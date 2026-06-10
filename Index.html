@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Outside Search Command Center</title>
+
+<!-- ═══ PWA — iOS / Android ═══════════════════════════════════ -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="OS Command">
+<meta name="application-name" content="OS Command">
+<meta name="theme-color" content="#111111" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#111111">
+<meta name="msapplication-TileColor" content="#111111">
+<meta name="format-detection" content="telephone=no">
+
+<!-- Apple splash / icon (inline SVG-based) -->
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='40' fill='%23111111'/><text x='90' y='125' font-family='system-ui' font-weight='700' font-size='82' fill='%23d8d8d8' text-anchor='middle'>JB</text></svg>">
+<link rel="manifest" href="manifest.json">
+
+<!-- ═══ Fonts ══════════════════════════════════════════════════ -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   BASE / THEME VARIABLES
+═══════════════════════════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#c8c8c8;--surface:#d8d8d8;--card:#e0e0e0;--card-hover:#d0d0d0;
+  --input:#c0c0c0;--input-focus:#e0e0e0;--border:#aaaaaa;--border-soft:#b8b8b8;
+  --border-focus:#555555;--text-1:#111111;--text-2:#333333;--text-3:#777777;
+  --accent:#555555;--accent-light:#b8b8b8;--accent-dark:#222222;
+  --header-bg:#111111;--header-text:#d8d8d8;--header-sub:#444444;
+  --green:#1a7a4a;--green-bg:#d0ead8;--green-border:#88c8a0;
+  --amber:#7a5a10;--amber-bg:#e8dcc0;--amber-border:#c0a060;
+  --red:#8a2020;--red-bg:#e8d0d0;--red-border:#c08080;
+  --hinge:#8a2828;--hinge-bg:#e8d0d0;
+  --bumble:#7a5010;--bumble-bg:#e8dcc0;
+  --r-sm:6px;--r-md:10px;--r-lg:14px;
+  --sh-sm:0 1px 4px rgba(0,0,0,.18),0 0 0 1px rgba(0,0,0,.08);
+  --sh-md:0 4px 16px rgba(0,0,0,.22),0 1px 4px rgba(0,0,0,.12);
+  --sh-lg:0 12px 40px rgba(0,0,0,.28),0 2px 8px rgba(0,0,0,.15);
+  --font:'Inter',-apple-system,sans-serif;--mono:'JetBrains Mono',monospace;--t:.14s ease;
+  /* PWA safe areas */
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+  --safe-left:env(safe-area-inset-left,0px);
+  --safe-right:env(safe-area-inset-right,0px);
+  /* Bottom nav height (mobile only) */
+  --bnav-h:64px;
+}
+[data-theme="dark"]{
+  --bg:#111111;--surface:#1a1a1a;--card:#222222;--card-hover:#2a2a2a;
+  --input:#0d0d0d;--input-focus:#222222;--border:#333333;--border-soft:#252525;
+  --border-focus:#888888;--text-1:#d8d8d8;--text-2:#888888;--text-3:#3a3a3a;
+  --accent:#888888;--accent-light:#1a1a1a;--accent-dark:#aaaaaa;
+  --header-bg:#080808;--header-text:#c8c8c8;--header-sub:#333333;
+  --green:#28a870;--green-bg:#081410;--green-border:#103a20;
+  --amber:#c09028;--amber-bg:#141008;--amber-border:#383010;
+  --red:#c84040;--red-bg:#140808;--red-border:#381818;
+  --hinge:#c84848;--hinge-bg:#140808;--bumble:#c09830;--bumble-bg:#141008;
+  --sh-sm:0 1px 4px rgba(0,0,0,.6),0 0 0 1px rgba(0,0,0,.3);
+  --sh-md:0 4px 16px rgba(0,0,0,.7),0 1px 4px rgba(0,0,0,.4);
+  --sh-lg:0 12px 40px rgba(0,0,0,.8),0 2px 8px rgba(0,0,0,.5);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BASE
+═══════════════════════════════════════════════════════════════ */
+html,body{
+  min-height:100%;min-height:100dvh;
+  width:100%;max-width:100%;
+  font-family:var(--font);background:var(--bg);color:var(--text-1);
+  font-size:13px;line-height:1.5;-webkit-font-smoothing:antialiased;
+  -webkit-tap-highlight-color:transparent;
+  overscroll-behavior-y:none;
+  overflow-x:hidden;
+}
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:var(--border-soft);}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px;}
+
+/* ═══════════════════════════════════════════════════════════════
+   HEADER
+═══════════════════════════════════════════════════════════════ */
+.hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 28px;
+  padding-left:max(28px, var(--safe-left));
+  padding-right:max(28px, var(--safe-right));
+  height:58px;background:var(--header-bg);
+  position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.4);
+}
+.brand{display:flex;align-items:center;gap:12px;}
+.brand-icon{width:34px;height:34px;background:linear-gradient(135deg,#555555,#222222);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;font-family:var(--font);color:#d8d8d8;letter-spacing:-.5px;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.1);}
+.brand-name{font-size:15px;font-weight:600;letter-spacing:-.3px;color:var(--header-text);}
+.brand-name span{font-weight:300;color:var(--header-sub);}
+.hdr-nav{display:flex;align-items:center;gap:8px;}
+.nl{font-size:11.5px;color:#555555;text-decoration:none;padding:5px 12px;border:1px solid #2a2a2a;border-radius:var(--r-sm);background:#1a1a1a;transition:all var(--t);white-space:nowrap;}
+.nl:hover{color:var(--header-text);border-color:#666666;background:#222222;}
+.ver{font-size:11px;color:#333333;font-family:var(--mono);padding:4px 9px;background:#0d0d0d;border:1px solid #2a2a2a;border-radius:var(--r-sm);}
+.theme-btn{display:flex;align-items:center;gap:6px;padding:5px 11px;border:1px solid #2a2a2a;border-radius:var(--r-sm);background:#1a1a1a;color:#555555;font-size:11.5px;font-weight:500;font-family:var(--font);cursor:pointer;transition:all var(--t);white-space:nowrap;}
+.theme-btn:hover{border-color:#666666;color:#c8c8c8;background:#222222;}
+
+/* ═══════════════════════════════════════════════════════════════
+   DESKTOP TABS (hidden on mobile — replaced by bottom nav)
+═══════════════════════════════════════════════════════════════ */
+.tabs-wrap{background:var(--surface);border-bottom:2px solid var(--border);padding:0 28px;}
+.tabs{display:flex;}
+.tab{padding:14px 20px;font-size:12.5px;font-weight:500;color:var(--text-3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all var(--t);user-select:none;display:flex;align-items:center;gap:7px;}
+.tab:hover{color:var(--text-2);background:var(--card-hover);}
+.tab.active{color:var(--accent-dark);border-bottom-color:var(--accent);font-weight:600;}
+.tdot{width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.6;flex-shrink:0;}
+.tab.active .tdot{opacity:1;}
+
+/* ═══════════════════════════════════════════════════════════════
+   MAIN CONTENT
+═══════════════════════════════════════════════════════════════ */
+.main{padding:24px 28px;max-width:1360px;margin:0 auto;}
+.pane{display:none;}.pane.active{display:block;}
+
+/* ═══════════════════════════════════════════════════════════════
+   CARDS
+═══════════════════════════════════════════════════════════════ */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);margin-bottom:16px;overflow:hidden;box-shadow:var(--sh-sm);}
+.card-hd{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border-soft);background:var(--surface);}
+.ctitle{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--text-2);}
+.card-bd{padding:20px;}
+
+/* ═══════════════════════════════════════════════════════════════
+   FORMS
+═══════════════════════════════════════════════════════════════ */
+.fg{display:flex;flex-direction:column;gap:5px;}
+label{font-size:11px;font-weight:600;color:var(--text-2);}
+.lnote{font-size:10px;color:var(--text-3);font-weight:400;}
+input[type=text],select,textarea{width:100%;padding:9px 12px;background:var(--input);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text-1);font-size:13px;font-family:var(--font);outline:none;transition:all var(--t);-webkit-appearance:none;}
+input::placeholder{color:var(--text-3);}
+input[type=text]:focus,select:focus{border-color:var(--border-focus);background:var(--input-focus);box-shadow:0 0 0 3px rgba(0,0,0,.1);}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23777777'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 11px center;padding-right:30px;cursor:pointer;}
+select option{background:var(--card);color:var(--text-1);}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+.g21{display:grid;grid-template-columns:2fr 1fr;gap:14px;}
+
+/* ═══════════════════════════════════════════════════════════════
+   BUTTONS
+═══════════════════════════════════════════════════════════════ */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:var(--r-sm);font-size:12.5px;font-weight:600;font-family:var(--font);cursor:pointer;border:none;outline:none;transition:all var(--t);white-space:nowrap;}
+.btn:disabled{opacity:.45;cursor:not-allowed;}
+.btn-p{background:linear-gradient(135deg,#555555,#333333);color:#e0e0e0;box-shadow:0 2px 8px rgba(0,0,0,.4);}
+.btn-p:hover:not(:disabled){background:linear-gradient(135deg,#666666,#444444);box-shadow:0 4px 12px rgba(0,0,0,.5);transform:translateY(-1px);}
+.btn-g{background:transparent;color:var(--text-2);border:1px solid var(--border);}
+.btn-g:hover:not(:disabled){background:var(--card-hover);border-color:var(--border-focus);color:var(--text-1);}
+.btn-ok{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border);font-weight:600;}
+.btn-ok:hover:not(:disabled){filter:brightness(.93);}
+.btn-del{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border);}
+.btn-del:hover:not(:disabled){filter:brightness(.93);}
+.btn-sm{padding:6px 13px;font-size:11.5px;}
+.btn-xs{padding:4px 10px;font-size:11px;}
+.brow{display:flex;gap:9px;flex-wrap:wrap;}
+
+/* ═══════════════════════════════════════════════════════════════
+   STEPS
+═══════════════════════════════════════════════════════════════ */
+.steps{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:22px;}
+.step{padding:11px 16px;text-align:center;background:var(--card);border:1px solid var(--border);border-radius:var(--r-md);font-size:12px;font-weight:500;color:var(--text-3);cursor:pointer;transition:all var(--t);box-shadow:var(--sh-sm);}
+.step.active{background:var(--accent-light);border-color:var(--accent);color:var(--accent-dark);font-weight:600;}
+.step .sn{font-family:var(--mono);font-size:10px;margin-right:6px;}
+
+/* ASSIGN LAYOUT */
+.alay{display:grid;grid-template-columns:1fr 1.45fr;gap:18px;}
+
+/* REC CARDS */
+.rc-list{display:flex;flex-direction:column;gap:10px;}
+.rc{background:var(--card);border:1px solid var(--border);border-radius:var(--r-md);overflow:hidden;cursor:pointer;transition:all var(--t);box-shadow:var(--sh-sm);}
+.rc:hover{border-color:var(--border-focus);box-shadow:var(--sh-md);transform:translateY(-1px);}
+.rc.sel{border-color:var(--accent);box-shadow:0 0 0 2px rgba(0,0,0,.25),var(--sh-md);}
+.rc.prim{border-top:3px solid var(--accent);}
+.rc-hd{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface);border-bottom:1px solid var(--border-soft);}
+.rc-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.9px;color:var(--text-3);}
+.rc.prim .rc-lbl{color:var(--accent-dark);}
+.rc-bd{padding:13px 14px;}
+.rc-id{font-family:var(--mono);font-size:12px;color:var(--accent-dark);font-weight:600;margin-bottom:3px;}
+.rc-email{font-size:12.5px;color:var(--text-1);margin-bottom:9px;word-break:break-all;font-weight:500;}
+.rc-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--border-soft);}
+.rc-row:last-child{border-bottom:none;}
+.rk{font-size:10.5px;color:var(--text-3);font-weight:500;}
+.rv{font-size:12px;color:var(--text-2);font-weight:500;}
+.rc-why{margin-top:9px;padding:8px 10px;background:var(--input);border-radius:var(--r-sm);border-left:3px solid var(--accent);font-size:11.5px;color:var(--text-2);line-height:1.5;}
+.spill{display:inline-flex;padding:2px 9px;background:var(--accent-light);border:1px solid #555555;border-radius:99px;font-size:11px;font-family:var(--mono);color:var(--accent-dark);font-weight:600;}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;gap:3px;padding:2px 9px;border-radius:99px;font-size:10.5px;font-weight:600;white-space:nowrap;border:1px solid transparent;}
+.bg{background:var(--green-bg);color:var(--green);border-color:var(--green-border);}
+.ba{background:var(--amber-bg);color:var(--amber);border-color:var(--amber-border);}
+.br{background:var(--red-bg);color:var(--red);border-color:var(--red-border);}
+.bx{background:var(--bg);color:var(--text-3);border-color:var(--border);}
+.bh{background:var(--hinge-bg);color:var(--hinge);border-color:#d4a0a0;}
+.bb{background:var(--bumble-bg);color:var(--bumble);border-color:#d4b888;}
+
+/* CONFIRM / SAVED */
+.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;}
+.ci{padding:10px 13px;background:var(--surface);border:1px solid var(--border-soft);border-radius:var(--r-sm);}
+.cl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-3);margin-bottom:4px;}
+.cv{font-size:13px;color:var(--text-1);font-weight:500;word-break:break-word;}
+
+/* SLACK */
+.slack-sec{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);overflow:hidden;margin-bottom:14px;}
+.slack-hd{padding:10px 14px;border-bottom:1px solid var(--border-soft);display:flex;align-items:center;justify-content:space-between;}
+.slack-hl{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-3);}
+.slack-body{padding:14px 16px;font-size:13px;color:var(--text-2);white-space:pre-wrap;line-height:1.85;font-family:var(--font);}
+
+/* LOOKUP */
+.lbar{display:flex;gap:10px;align-items:flex-end;margin-bottom:16px;flex-wrap:wrap;}
+.lbar .fg:first-child{width:190px;flex-shrink:0;}
+.lbar .fg:nth-child(2){flex:1;}
+
+/* TABLES */
+.tw{border:1px solid var(--border);border-radius:var(--r-md);overflow:hidden;box-shadow:var(--sh-sm);}
+.ts{max-height:520px;overflow-y:auto;}
+table{width:100%;border-collapse:collapse;font-size:12.5px;}
+thead{position:sticky;top:0;z-index:2;}
+th{padding:10px 14px;background:var(--surface);color:var(--text-3);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;border-bottom:1px solid var(--border);text-align:left;white-space:nowrap;}
+td{padding:10px 14px;border-bottom:1px solid var(--border-soft);color:var(--text-2);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tbody tr:hover td{background:var(--card-hover);}
+.mc{font-family:var(--mono);font-size:11.5px;color:var(--text-1);white-space:nowrap;}
+.rcount{font-size:11.5px;color:var(--text-3);margin-bottom:10px;font-weight:500;}
+
+/* INLINE ACTION */
+.ia{background:var(--accent-light);border-top:1px solid #555555;padding:11px 14px;display:flex;gap:9px;align-items:center;flex-wrap:wrap;}
+.ia input{width:145px;flex-shrink:0;background:var(--card);}
+.ia .ilbl{font-size:11px;color:var(--accent-dark);font-weight:600;white-space:nowrap;}
+
+/* SLACK INLINE */
+.si-wrap{background:var(--green-bg);border-top:1px solid var(--green-border);padding:13px 14px;}
+.si-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--green);margin-bottom:7px;}
+.si-body{font-size:12.5px;color:var(--green);white-space:pre-wrap;line-height:1.8;font-family:var(--font);margin-bottom:9px;}
+
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(22,22,25,.6);backdrop-filter:blur(4px);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px;}
+.modal-bg.open{display:flex;}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:28px;max-width:420px;width:100%;box-shadow:var(--sh-lg);}
+.modal-title{font-size:15px;font-weight:700;color:var(--text-1);margin-bottom:6px;}
+.modal-sub{font-size:12.5px;color:var(--text-2);margin-bottom:20px;line-height:1.6;}
+.app-choices{display:flex;flex-direction:column;gap:9px;margin-bottom:22px;}
+.apc{display:flex;align-items:center;gap:12px;padding:13px 15px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r-md);cursor:pointer;transition:all var(--t);}
+.apc:hover{border-color:var(--border-focus);background:var(--accent-light);}
+.apc.picked{border-color:var(--accent);background:var(--accent-light);box-shadow:0 0 0 2px rgba(181,136,99,.15);}
+.apc input{display:none;}
+.apc-dot{width:16px;height:16px;border-radius:50%;border:2px solid var(--border-focus);flex-shrink:0;transition:all var(--t);display:flex;align-items:center;justify-content:center;}
+.apc.picked .apc-dot{background:var(--accent);border-color:var(--accent);}
+.apc.picked .apc-dot::after{content:'';width:6px;height:6px;border-radius:50%;background:#d8d8d8;display:block;}
+.apc-lbl{font-size:13px;font-weight:500;color:var(--text-1);}
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;}
+
+/* TOOLBAR */
+.toolbar{display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap;}
+.toolbar input{flex:1;min-width:200px;}
+
+/* TOAST */
+#tw{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;}
+.toast{display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:var(--r-md);background:var(--card);border:1px solid var(--border);box-shadow:var(--sh-lg);font-size:13px;max-width:360px;pointer-events:all;animation:tin .2s ease;font-weight:500;}
+@keyframes tin{from{transform:translateX(12px);opacity:0;}to{transform:none;opacity:1;}}
+.tok{border-color:var(--green-border);color:var(--green);background:var(--green-bg);}
+.terr{border-color:var(--red-border);color:var(--red);background:var(--red-bg);}
+.twarn{border-color:var(--amber-border);color:var(--amber);background:var(--amber-bg);}
+.tinfo{border-color:var(--border-focus);color:var(--text-2);background:var(--card);}
+
+/* EMPTY/LOAD */
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:52px 20px;color:var(--text-3);text-align:center;gap:8px;}
+.ei{font-size:28px;opacity:.5;}
+.et{font-size:13.5px;font-weight:500;color:var(--text-2);}
+.es{font-size:12px;color:var(--text-3);}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:rot .65s linear infinite;}
+@keyframes rot{to{transform:rotate(360deg);}}
+.load{display:flex;align-items:center;gap:10px;padding:44px 20px;color:var(--text-3);font-size:13px;justify-content:center;}
+
+/* STAT GRID */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:18px;}
+
+.hidden{display:none!important;}
+
+/* ═══════════════════════════════════════════════════════════════
+   ██ BOTTOM NAV — MOBILE / PWA ONLY ██
+   Replaces top tabs on small screens. Fixed at bottom.
+═══════════════════════════════════════════════════════════════ */
+.bnav{
+  display:none; /* shown via media query below */
+  position:fixed;bottom:0;left:0;right:0;
+  height:calc(var(--bnav-h) + var(--safe-bottom));
+  padding-bottom:var(--safe-bottom);
+  background:var(--header-bg);
+  border-top:1px solid rgba(255,255,255,.08);
+  z-index:200;
+  box-shadow:0 -4px 24px rgba(0,0,0,.5);
+}
+.bnav-inner{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  height:var(--bnav-h);
+}
+.bni{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;cursor:pointer;
+  padding:6px 4px;
+  transition:all .12s ease;
+  -webkit-tap-highlight-color:transparent;
+  border:none;background:none;font-family:var(--font);
+  position:relative;
+}
+.bni:active{transform:scale(.92);}
+.bni-icon{font-size:22px;line-height:1;}
+.bni-lbl{
+  font-size:9.5px;font-weight:600;color:#444444;
+  letter-spacing:.3px;text-transform:uppercase;
+  transition:color .12s ease;
+}
+.bni.active .bni-lbl{color:#aaaaaa;}
+.bni.active .bni-icon{filter:drop-shadow(0 0 6px rgba(200,200,200,.4));}
+/* active pill indicator */
+.bni.active::before{
+  content:'';
+  position:absolute;top:4px;
+  width:32px;height:3px;
+  background:#888888;
+  border-radius:0 0 3px 3px;
+}
+/* Badge on nav items (for overdue count) */
+.bni-badge{
+  position:absolute;top:2px;right:calc(50% - 20px);
+  min-width:16px;height:16px;
+  background:var(--red);color:#fff;
+  font-size:9px;font-weight:700;
+  border-radius:99px;
+  display:flex;align-items:center;justify-content:center;
+  padding:0 4px;
+  border:1.5px solid var(--header-bg);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ██ PWA INSTALL BANNER ██
+═══════════════════════════════════════════════════════════════ */
+#pwa-banner{
+  display:none;
+  position:fixed;top:58px;left:0;right:0;z-index:150;
+  background:#1a1a1a;border-bottom:1px solid #333;
+  padding:10px 16px;
+  align-items:center;gap:10px;
+  animation:slidedown .25s ease;
+}
+@keyframes slidedown{from{transform:translateY(-100%);opacity:0;}to{transform:none;opacity:1;}}
+#pwa-banner.show{display:flex;}
+#pwa-banner .pwa-msg{flex:1;font-size:12px;color:#aaa;line-height:1.4;}
+#pwa-banner .pwa-msg strong{color:#d8d8d8;display:block;font-size:13px;}
+#pwa-banner .pwa-steps{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+#pwa-banner .pwa-close{background:none;border:none;color:#555;font-size:18px;cursor:pointer;padding:4px;line-height:1;}
+
+/* ═══════════════════════════════════════════════════════════════
+   ██ RESPONSIVE — TABLET ██
+═══════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════
+   ██ RESPONSIVE — MOBILE ██
+═══════════════════════════════════════════════════════════════ */
+@media(max-width:768px){
+  html,body{font-size:14px;}
+
+  /* Header shrinks, nav links hidden — theme toggle kept */
+  .hdr{padding:0 14px;height:52px;padding-left:max(14px,var(--safe-left));padding-right:max(14px,var(--safe-right));}
+  .brand-name{font-size:13px;}
+  .brand-icon{width:30px;height:30px;font-size:11px;}
+  .hdr-nav .nl,.hdr-nav .ver{display:none;}
+  .theme-btn{padding:5px 10px;font-size:12px;min-height:36px;}
+
+  /* DESKTOP TABS — hidden on mobile (bottom nav takes over) */
+  .tabs-wrap{display:none!important;}
+
+  /* Show bottom nav */
+  .bnav{display:block;}
+
+  /* Content gets bottom padding so it's not hidden behind nav */
+  .main{
+    padding:14px 12px;
+    padding-left:max(12px,var(--safe-left));
+    padding-right:max(12px,var(--safe-right));
+    padding-bottom:calc(var(--bnav-h) + var(--safe-bottom) + 16px);
+  }
+
+  /* Toasts above bottom nav */
+  #tw{
+    bottom:calc(var(--bnav-h) + var(--safe-bottom) + 8px);
+    right:12px;left:12px;
+  }
+  .toast{max-width:100%;font-size:12.5px;}
+
+  /* Cards */
+  .card-hd{padding:11px 14px;flex-wrap:wrap;gap:6px;}
+  .card-bd{padding:14px;}
+  .ctitle{font-size:10px;}
+
+  /* Steps — compact on mobile */
+  .steps{grid-template-columns:1fr 1fr 1fr;gap:4px;}
+  .step{padding:10px 8px;font-size:11px;}
+  .step .sn{font-size:9px;}
+
+  /* Assign layout always single column */
+  .alay{grid-template-columns:1fr!important;}
+
+  /* Grids always single column */
+  .g2,.g3,.g21{grid-template-columns:1fr!important;}
+
+  /* Buttons — bigger touch targets */
+  .btn{padding:11px 16px;font-size:13px;min-height:44px;}
+  .btn-sm{padding:8px 14px;font-size:12.5px;min-height:40px;}
+  .btn-xs{padding:7px 12px;font-size:12px;min-height:36px;}
+  .brow{gap:8px;}
+  .brow .btn{flex:1;justify-content:center;}
+
+  /* Touch-friendly inputs */
+  input[type=text],select,textarea{
+    padding:12px 14px;font-size:16px!important; /* 16px prevents iOS zoom */
+    min-height:44px;
+  }
+  label{font-size:12px;}
+
+  /* Stat cards */
+  .stat-grid{grid-template-columns:1fr 1fr!important;gap:8px!important;margin-bottom:14px;}
+  #is-stats{grid-template-columns:1fr 1fr!important;}
+  .charts-row{grid-template-columns:1fr!important;}
+
+  /* Tables */
+  .tw{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .ts{max-height:420px;}
+  table{font-size:12px;min-width:560px;}
+  th,td{padding:8px 10px!important;}
+
+  /* Rec cards */
+  .rc-bd{padding:10px 12px;}
+  .cgrid{grid-template-columns:1fr 1fr;}
+
+  /* Lookup bar */
+  .lbar{flex-direction:column;gap:8px;}
+  .lbar .fg:first-child,.lbar .fg:nth-child(2){width:100%!important;}
+
+  /* Toolbar */
+  .toolbar{flex-direction:column;gap:8px;}
+  .toolbar input{min-width:0;width:100%;}
+
+  /* Modal */
+  .modal-bg{padding:12px;align-items:flex-end;}
+  .modal{
+    padding:20px;border-radius:var(--r-lg) var(--r-lg) 0 0;
+    width:100%;max-width:100%;
+    padding-bottom:max(20px, var(--safe-bottom));
+  }
+
+  /* Inside search */
+  #pane-inside>div[style*="grid-template-columns:1fr 1fr"]{grid-template-columns:1fr!important;}
+
+  /* Next-to-assign banner */
+  #os-next-wrap>div{flex-direction:column;align-items:flex-start!important;}
+  #os-next-wrap .btn{width:100%;justify-content:center;margin-top:8px;}
+
+  /* EOD notes */
+  #eod-notes-wrap>div{grid-template-columns:1fr!important;}
+
+  /* Overdue section */
+  #os-overdue-body table{min-width:440px;}
+  #is-overdue-wrap table{min-width:500px;}
+
+  /* Filter pills */
+  #os-filters{gap:5px;}
+  #os-filters .btn{font-size:11.5px;padding:8px 12px;min-height:36px;}
+
+  /* Timer */
+  #os-timer-wrap>div>div{flex-direction:column;gap:6px;align-items:flex-start!important;}
+
+  /* EOD inside stats */
+  #eod-os-stats>.stat-grid{grid-template-columns:1fr 1fr!important;}
+
+  /* Active tab label in header on mobile */
+  .mobile-tab-label{
+    font-size:11px;font-weight:600;color:#555;
+    font-family:var(--mono);padding:4px 9px;
+    background:#0d0d0d;border:1px solid #2a2a2a;border-radius:var(--r-sm);
+    display:inline-block;
+  }
+}
+/* Tablet landscape edge */
+@media(max-width:720px){.g2,.g3,.g21{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<!-- ═══ HEADER ════════════════════════════════════════════════ -->
+<header class="hdr">
+  <div class="brand">
+    <div class="brand-icon">JB</div>
+    <div class="brand-name">Outside Search <span>Command Center</span></div>
+  </div>
+  <nav class="hdr-nav">
+    <a class="nl" href="https://docs.google.com/spreadsheets/d/1nGssGvwIdgIg7PAS_QINPG9YFhYn1LM8tgHENB-hM-o/edit" target="_blank">📋 Engine</a>
+    <a class="nl" href="https://docs.google.com/spreadsheets/d/1gHkeuz5SsPixghH8z3q6orMXs_3zSMjHf4Pr7lbk0Yw/edit" target="_blank">📊 Dashboard</a>
+    <a class="nl" href="https://docs.google.com/spreadsheets/d/1DFzm0LS1MywIRdOJwRaJJz-_CfhrcXt_TpEnEnVnmqY/edit" target="_blank">🗂 Tracker</a>
+    <span class="ver" id="desktop-tab-label">v4.2</span>
+    <button class="theme-btn" onclick="toggleTheme()" id="theme-btn">🌙 Dark</button>
+  </nav>
+</header>
+
+<!-- ═══ PWA INSTALL BANNER (iOS) ══════════════════════════════ -->
+<div id="pwa-banner">
+  <div class="pwa-msg">
+    <strong>Add to Home Screen</strong>
+    Open in Safari → tap <strong>Share ⎋</strong> → <em>Add to Home Screen</em>
+  </div>
+  <button class="pwa-close" onclick="dismissPWABanner()">✕</button>
+</div>
+
+<!-- ═══ DESKTOP TAB BAR ═══════════════════════════════════════ -->
+<div class="tabs-wrap">
+  <div class="tabs">
+    <div class="tab active" data-tab="assign"><div class="tdot"></div>Assign Client</div>
+    <div class="tab" data-tab="lookup"><div class="tdot"></div>Account Lookup</div>
+    <div class="tab" data-tab="eod"><div class="tdot"></div>EOD Report</div>
+    <div class="tab" data-tab="inside"><div class="tdot"></div>Inside Search</div>
+    <div class="tab" data-tab="outside"><div class="tdot"></div>Outside Search</div>
+  </div>
+</div>
+
+<!-- ═══ TOAST CONTAINER ═══════════════════════════════════════ -->
+<div id="tw"></div>
+
+<!-- ═══ APP MODAL ═════════════════════════════════════════════ -->
+<div class="modal-bg" id="app-modal">
+  <div class="modal">
+    <div class="modal-title">Select App to Update</div>
+    <div class="modal-sub" id="amsub">This email appears on multiple apps. Which one should be updated?</div>
+    <div class="app-choices">
+      <label class="apc picked" id="ch-hinge"><input type="radio" name="app-pick" value="Hinge" checked><div class="apc-dot"></div><span class="badge bh">Hinge</span><span class="apc-lbl">Hinge account</span></label>
+      <label class="apc" id="ch-bumble"><input type="radio" name="app-pick" value="Bumble"><div class="apc-dot"></div><span class="badge bb">Bumble</span><span class="apc-lbl">Bumble account</span></label>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-g btn-sm" onclick="closeAM()">Cancel</button>
+      <button class="btn btn-p btn-sm" onclick="confirmAM()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MAIN CONTENT ══════════════════════════════════════════ -->
+<main class="main">
+
+<!-- ASSIGN CLIENT -->
+<div class="pane active" id="pane-assign">
+  <div id="assign-prefill-banner" class="hidden" style="background:var(--amber-bg);border:1px solid var(--amber-border);border-radius:var(--r-md);padding:11px 18px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+    <div style="display:flex;align-items:center;gap:10px;"><span style="font-size:16px;">⚡</span><div><div style="font-size:12px;font-weight:600;color:var(--amber);">Pre-filled from Outside Search</div><div id="assign-prefill-desc" style="font-size:11px;color:var(--amber);opacity:.85;margin-top:2px;"></div></div></div>
+    <button class="btn btn-g btn-sm" onclick="clearPrefillBanner()" style="border-color:var(--amber-border);color:var(--amber);">Dismiss</button>
+  </div>
+  <div class="steps">
+    <div class="step active" id="ws-1"><span class="sn">01</span>Client Info</div>
+    <div class="step" id="ws-2"><span class="sn">02</span>Recommendation</div>
+    <div class="step" id="ws-3"><span class="sn">03</span>Confirm &amp; Save</div>
+  </div>
+  <div class="alay">
+    <div>
+      <div class="card">
+        <div class="card-hd"><span class="ctitle">Client Info</span></div>
+        <div class="card-bd">
+          <div class="g21" style="margin-bottom:14px;">
+            <div class="fg"><label>Client Name</label><input type="text" id="inp-cn" placeholder="e.g. Julie Hess" oninput="onClientNameInput(this.value)"></div>
+            <div class="fg"><label>App Needed</label><select id="inp-app"><option value="Hinge">Hinge</option><option value="Bumble">Bumble</option></select></div>
+          </div>
+          <div class="g3" style="margin-bottom:14px;">
+            <div class="fg"><label>City <span class="lnote">(core name)</span></label><input type="text" id="inp-cy" placeholder="e.g. BOSTON"><span id="cy-hint" style="font-size:10px;color:var(--green);display:none;">✓ auto-filled</span></div>
+            <div class="fg"><label>Age Preference</label><input type="text" id="inp-ag" placeholder="e.g. 28-38"><span id="ag-hint" style="font-size:10px;color:var(--green);display:none;">✓ auto-filled</span></div>
+            <div class="fg"><label>Client Gender</label><select id="inp-ge"><option value="Male">Male</option><option value="Female">Female</option></select></div>
+          </div>
+          <div class="brow">
+            <button class="btn btn-p" id="btn-get" onclick="getBest()">⚡ Get Best Account</button>
+            <button class="btn btn-g" onclick="loadCur()">↺ Load Current</button>
+            <button class="btn btn-g" onclick="resetAll()">Clear</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card hidden" id="rec-panel">
+        <div class="card-hd"><span class="ctitle">Recommendation</span></div>
+        <div id="maxed-warning" class="hidden" style="background:var(--amber-bg);border-bottom:1px solid var(--amber-border);padding:10px 20px;"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--amber);margin-bottom:6px;">⚠ Previously maxed out accounts for this client</div><div id="maxed-warning-list" style="font-size:12px;color:var(--text-2);line-height:1.8;"></div></div>
+        <div class="card-bd">
+          <div class="rc-list" id="rc-container"></div>
+          <div id="acct-status-panel" class="hidden" style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border-soft);">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;"><div class="ctitle" style="color:var(--accent-dark);">↺ Live Account Status</div><span style="font-size:11px;color:var(--text-3);">reads from Account Tracker</span></div>
+            <div id="acct-status-list" style="display:flex;flex-direction:column;gap:7px;"></div>
+          </div>
+          <div style="margin-top:18px;padding-top:16px;border-top:1px solid var(--border-soft);">
+            <div class="ctitle" style="margin-bottom:14px;">Confirm Assignment</div>
+            <div class="g2" style="margin-bottom:12px;">
+              <div class="fg"><label>Use Account</label><select id="sel-acct" onchange="onAcctSel()"><option value="Best Account">Best Account (Primary)</option><option value="Backup 1">Backup 1</option><option value="Backup 2">Backup 2</option></select></div>
+              <div class="fg"><label>Searcher Type</label><select id="sel-srch"><option value="Primary">Primary</option><option value="Secondary">Secondary</option><option value="Outside Search">Outside Search</option></select></div>
+            </div>
+            <div class="g2" style="margin-bottom:12px;">
+              <div class="fg"><label>Owner VA <span class="lnote">(auto-filled)</span></label><input type="text" id="inp-ova" placeholder="Auto-filled" readonly style="opacity:.65;cursor:default;"></div>
+              <div class="fg"><label>Assign to VA <span class="lnote">(current holder)</span></label><input type="text" id="inp-hld" placeholder="VA handling this session"></div>
+            </div>
+            <div class="fg" style="margin-bottom:16px;"><label>Login Email <span class="lnote">(auto-filled — override if needed)</span></label><input type="text" id="inp-log" placeholder="Auto-filled"></div>
+            <button class="btn btn-ok" id="btn-save" onclick="doSave()" style="width:100%;justify-content:center;">✓ Confirm &amp; Save to All Sheets</button>
+          </div>
+        </div>
+      </div>
+      <div class="card hidden" id="saved-panel">
+        <div class="card-hd"><span class="ctitle" style="color:var(--green);">✓ Assignment Saved</span><button class="btn btn-g btn-sm" onclick="resetAll()">New Assignment</button></div>
+        <div class="card-bd">
+          <div class="cgrid" id="saved-summary"></div>
+          <div class="slack-sec">
+            <div class="slack-hd"><span class="slack-hl">📨 Slack Message</span><button class="btn btn-g btn-sm" onclick="copySlack()">📋 Copy</button></div>
+            <div class="slack-body" id="slack-body"></div>
+          </div>
+        </div>
+      </div>
+      <div class="card" id="rec-empty">
+        <div class="card-bd"><div class="empty"><div class="ei">💡</div><div class="et">Ready to find the best account</div><div class="es">Fill in client info and click Get Best Account</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ACCOUNT LOOKUP -->
+<div class="pane" id="pane-lookup">
+  <div class="card">
+    <div class="card-hd"><span class="ctitle">Account Lookup</span><span style="font-size:11.5px;color:var(--text-3);">Reads &amp; writes → Account Control Tracker (Data Source)</span></div>
+    <div class="card-bd">
+      <div class="lbar">
+        <div class="fg"><label>Search By</label><select id="lu-type"><option value="email">Email / Login</option><option value="va">VA Name (Owner or Current)</option><option value="client">Assigned Client</option></select></div>
+        <div class="fg"><label>Search Query</label><input type="text" id="lu-q" placeholder="Type to filter…" oninput="doLookup()" onkeydown="if(event.key==='Enter')doLookup()"></div>
+        <div style="padding-top:18px;"><button class="btn btn-p" id="btn-srch" onclick="doLookup()">Search</button></div>
+      </div>
+      <div id="lu-results"><div class="empty"><div class="ei">🔍</div><div class="et">Search results appear here</div><div class="es">Search by email, VA name, or assigned client</div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- EOD REPORT -->
+<div class="pane" id="pane-eod">
+  <div class="card">
+    <div class="card-hd"><span class="ctitle">EOD Report</span><span style="font-size:11.5px;color:var(--text-3);">Pulls from Account Usage Log</span></div>
+    <div class="card-bd">
+      <div style="display:flex;gap:10px;align-items:flex-end;margin-bottom:18px;flex-wrap:wrap;">
+        <div class="fg" style="width:180px;flex-shrink:0;"><label>Report Date</label><input type="text" id="eod-date" placeholder="e.g. 5/16/2026"></div>
+        <div class="fg" style="width:180px;flex-shrink:0;"><label>Your Name <span class="lnote">(VA / Manager)</span></label><input type="text" id="eod-name" placeholder="e.g. Jae"></div>
+        <div style="padding-top:18px;"><button class="btn btn-p" id="btn-eod" onclick="loadEOD()">📊 Generate Report</button></div>
+        <div style="padding-top:18px;"><button class="btn btn-g" onclick="setEODToday()">Today</button></div>
+      </div>
+      <div id="eod-os-stats" style="display:none;margin-bottom:14px;">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.9px;color:var(--text-3);margin-bottom:8px;">Outside Search — Current Status</div>
+        <div class="stat-grid" style="margin-bottom:0;">
+          <div class="ci" style="text-align:center;"><div class="cl">Total</div><div class="cv" style="font-size:20px;font-weight:700;" id="eos-total">0</div></div>
+          <div class="ci" style="text-align:center;background:var(--red-bg);"><div class="cl" style="color:var(--red);">Overdue</div><div class="cv" style="font-size:20px;font-weight:700;color:var(--red);" id="eos-overdue">0</div></div>
+          <div class="ci" style="text-align:center;background:var(--amber-bg);"><div class="cl" style="color:var(--amber);">Due Today</div><div class="cv" style="font-size:20px;font-weight:700;color:var(--amber);" id="eos-duetoday">0</div></div>
+          <div class="ci" style="text-align:center;"><div class="cl">Not Started</div><div class="cv" style="font-size:20px;font-weight:700;" id="eos-notstarted">0</div></div>
+          <div class="ci" style="text-align:center;"><div class="cl">In Progress</div><div class="cv" style="font-size:20px;font-weight:700;" id="eos-inprogress">0</div></div>
+          <div class="ci" style="text-align:center;"><div class="cl">Pending Batch</div><div class="cv" style="font-size:20px;font-weight:700;" id="eos-pending">0</div></div>
+        </div>
+      </div>
+      <div id="eod-stats" style="display:none;margin-bottom:14px;">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;">
+          <div class="ci" style="text-align:center;"><div class="cl">Assigned</div><div class="cv" style="font-size:22px;font-weight:700;" id="eod-count">0</div></div>
+          <div class="ci" style="text-align:center;"><div class="cl">Hinge</div><div class="cv" style="font-size:22px;font-weight:700;" id="eod-hinge">0</div></div>
+          <div class="ci" style="text-align:center;"><div class="cl">Bumble</div><div class="cv" style="font-size:22px;font-weight:700;" id="eod-bumble">0</div></div>
+          <div class="ci" style="text-align:center;"><div class="cl">VAs Used</div><div class="cv" style="font-size:22px;font-weight:700;" id="eod-vas">0</div></div>
+        </div>
+      </div>
+      <div style="margin-top:14px;" id="eod-notes-wrap">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div class="fg"><label>Maxed Out Clients <span class="lnote">(optional)</span></label><textarea id="eod-maxed" rows="3" placeholder="e.g. John Smith — maxed out today" style="width:100%;padding:9px 12px;background:var(--input);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text-1);font-size:13px;font-family:var(--font);outline:none;resize:vertical;"></textarea></div>
+          <div class="fg"><label>Additional Notes <span class="lnote">(optional)</span></label><textarea id="eod-notes" rows="3" placeholder="Issues, follow-ups…" style="width:100%;padding:9px 12px;background:var(--input);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text-1);font-size:13px;font-family:var(--font);outline:none;resize:vertical;"></textarea></div>
+        </div>
+      </div>
+      <div id="eod-table-wrap"></div>
+    </div>
+  </div>
+  <div class="card hidden" id="eod-slack-card">
+    <div class="card-hd"><span class="ctitle">📨 EOD Slack Summary</span><button class="btn btn-g btn-sm" onclick="copyEODSlack()">📋 Copy</button></div>
+    <div class="card-bd"><div id="eod-slack-box" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:14px 16px;font-size:13px;color:var(--text-2);white-space:pre-wrap;line-height:1.85;font-family:var(--font);"></div></div>
+  </div>
+</div>
+
+<!-- INSIDE SEARCH DASHBOARD -->
+<div class="pane" id="pane-inside">
+  <div id="is-stats" class="stat-grid"></div>
+  <div class="charts-row" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;">
+    <div class="card"><div class="card-hd"><span class="ctitle">Clients per VA</span></div><div class="card-bd" style="padding:14px;"><div style="position:relative;height:200px;"><canvas id="is-bar-chart">Loading…</canvas></div></div></div>
+    <div class="card"><div class="card-hd"><span class="ctitle">Status Breakdown</span></div><div class="card-bd" style="padding:14px;"><div id="is-donut-legend" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;font-size:11px;color:var(--text-3);"></div><div style="position:relative;height:160px;"><canvas id="is-donut-chart">Loading…</canvas></div></div></div>
+  </div>
+  <div class="card" style="margin-bottom:14px;">
+    <div class="card-hd"><span class="ctitle">VA Performance</span><button class="btn btn-g btn-sm" id="btn-is-refresh" onclick="loadInsideSearch()">↺ Refresh</button></div>
+    <div class="card-bd" style="padding:0;"><div id="is-table-wrap"><div class="empty"><div class="ei">📊</div><div class="et">Click Refresh to load dashboard</div><div class="es">Pulls from Inside Search Dashboard sheet</div></div></div></div>
+  </div>
+  <div class="card" id="is-overdue-card">
+    <div class="card-hd"><span class="ctitle" style="color:var(--red);">⚠ Overdue Clients</span><span id="is-overdue-count" style="font-size:11.5px;color:var(--text-3);"></span></div>
+    <div class="card-bd" style="padding:0;"><div id="is-overdue-wrap"><div class="empty"><div class="es">Loads with refresh above</div></div></div></div>
+  </div>
+</div>
+
+<!-- OUTSIDE SEARCH DASHBOARD -->
+<div class="pane" id="pane-outside">
+  <div id="os-stats" class="stat-grid"></div>
+  <div id="os-next-wrap" class="hidden" style="margin-bottom:14px;"></div>
+  <div class="card" id="os-timer-card" style="margin-bottom:14px;">
+    <div class="card-hd"><span class="ctitle" style="color:var(--red);">⏱ Check-in Needed</span><div style="display:flex;align-items:center;gap:10px;"><span id="os-timer-count" style="font-size:11.5px;color:var(--text-3);">loads with refresh</span><span style="font-size:11px;color:var(--text-3);">· timer starts only when assigned via this command center</span></div></div>
+    <div id="os-timer-wrap"><div class="empty" style="padding:20px;"><div class="es">Loads when you refresh the queue</div></div></div>
+  </div>
+  <div class="card" style="margin-bottom:14px;">
+    <div class="card-hd"><span class="ctitle">Client Queue</span><button class="btn btn-g btn-sm" id="btn-os-refresh" onclick="loadOutsideSearch()">↺ Refresh</button></div>
+    <div class="card-bd" style="padding:14px 20px;">
+      <div id="os-filters" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;"></div>
+      <div id="os-table-wrap"><div class="empty"><div class="ei">📋</div><div class="et">Click Refresh to load</div><div class="es">Pulls from Outside Search Dashboard → Client Assignments</div></div></div>
+    </div>
+  </div>
+  <div class="card" id="os-overdue-card" style="overflow:visible;">
+    <div class="card-hd" style="cursor:pointer;" onclick="toggleOverdue()">
+      <div style="display:flex;align-items:center;gap:10px;"><span class="ctitle" style="color:var(--red);">⚠ Overdue Clients</span><span id="os-overdue-badge" style="font-size:11px;font-weight:600;background:var(--red-bg);color:var(--red);padding:2px 9px;border-radius:99px;border:1px solid var(--red-border);">—</span><span style="font-size:11px;color:var(--text-3);">active only · Done/Maxed Out/FC Needed excluded</span></div>
+      <span id="os-overdue-toggle-lbl" style="font-size:12px;color:var(--text-3);">▼ expand</span>
+    </div>
+    <div id="os-overdue-body" style="display:none;"><div id="os-overdue-list" style="padding:0;"></div></div>
+  </div>
+</div>
+
+</main>
+
+<!-- ═══════════════════════════════════════════════════════════
+     MOBILE BOTTOM NAV
+═══════════════════════════════════════════════════════════════ -->
+<nav class="bnav" id="bottom-nav" aria-label="Main navigation">
+  <div class="bnav-inner">
+    <button class="bni active" data-tab="assign" onclick="switchTab('assign')" aria-label="Assign Client">
+      <span class="bni-icon">📋</span>
+      <span class="bni-lbl">Assign</span>
+    </button>
+    <button class="bni" data-tab="lookup" onclick="switchTab('lookup')" aria-label="Account Lookup">
+      <span class="bni-icon">🔍</span>
+      <span class="bni-lbl">Lookup</span>
+    </button>
+    <button class="bni" data-tab="eod" onclick="switchTab('eod')" aria-label="EOD Report">
+      <span class="bni-icon">📊</span>
+      <span class="bni-lbl">EOD</span>
+    </button>
+    <button class="bni" data-tab="inside" onclick="switchTab('inside')" aria-label="Inside Search">
+      <span class="bni-icon">🔎</span>
+      <span class="bni-lbl">Inside</span>
+      <span class="bni-badge hidden" id="bnav-inside-badge"></span>
+    </button>
+    <button class="bni" data-tab="outside" onclick="switchTab('outside')" aria-label="Outside Search">
+      <span class="bni-icon">📌</span>
+      <span class="bni-lbl">Outside</span>
+      <span class="bni-badge hidden" id="bnav-outside-badge"></span>
+    </button>
+  </div>
+</nav>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   SERVICE WORKER REGISTRATION
+═══════════════════════════════════════════════════════════════ */
+if('serviceWorker' in navigator){
+  window.addEventListener('load',function(){
+    navigator.serviceWorker.register('sw.js').catch(function(){
+      // SW not available in GAS deployment — that's fine
+    });
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PWA INSTALL BANNER — iOS only, only in browser (not standalone)
+═══════════════════════════════════════════════════════════════ */
+(function(){
+  var isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
+  var isStandalone=window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone;
+  var dismissed=localStorage.getItem('pwa-dismissed');
+  if(isIOS&&!isStandalone&&!dismissed){
+    document.getElementById('pwa-banner').classList.add('show');
+  }
+})();
+function dismissPWABanner(){
+  document.getElementById('pwa-banner').classList.remove('show');
+  try{localStorage.setItem('pwa-dismissed','1');}catch(e){}
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MOBILE DETECTION — JS fallback for GAS iframe width issues
+═══════════════════════════════════════════════════════════════ */
+(function(){
+  var ua = navigator.userAgent || '';
+  var isPhone = /iphone|ipod|android.*mobile/i.test(ua);
+  
+  if (!isPhone) return;
+
+  // ── Step 1: If we're inside a GAS iframe, break out to top window ──
+  if (window.self !== window.top) {
+    try {
+      // Try to redirect top window to our URL
+      window.top.location.href = window.self.location.href;
+      return;
+    } catch(e) {
+      // Cross-origin block — can't break out, so we scale instead
+    }
+  }
+
+  // ── Step 2: Apply mobile layout styles ──
+  var style = document.createElement('style');
+  style.textContent =
+    'html{font-size:16px!important;}'+
+    'body{font-size:16px!important;width:100vw!important;overflow-x:hidden!important;}'+
+    '.tabs-wrap{display:none!important;}'+
+    '#bottom-nav{display:block!important;}'+
+    '.hdr{padding:0 16px!important;height:54px!important;}'+
+    '.hdr-nav .nl,.hdr-nav .ver{display:none!important;}'+
+    '.brand-name{font-size:15px!important;}'+
+    '.main{padding:16px 14px!important;padding-bottom:calc(var(--bnav-h) + var(--safe-bottom) + 20px)!important;max-width:100vw!important;}'+
+    '.alay{grid-template-columns:1fr!important;}'+
+    '.g2,.g3,.g21{grid-template-columns:1fr!important;}'+
+    '.brow{flex-direction:column!important;}'+
+    '.brow .btn{width:100%!important;justify-content:center!important;}'+
+    '.btn{min-height:50px!important;font-size:15px!important;padding:13px 18px!important;}'+
+    '.btn-sm{min-height:42px!important;font-size:14px!important;padding:10px 16px!important;}'+
+    '.btn-xs{min-height:38px!important;font-size:13px!important;}'+
+    'input[type=text],select,textarea{font-size:16px!important;min-height:50px!important;padding:13px 14px!important;}'+
+    'label{font-size:14px!important;font-weight:600!important;}'+
+    '.lnote{font-size:12px!important;}'+
+    '.stat-grid{grid-template-columns:1fr 1fr!important;gap:10px!important;}'+
+    '#is-stats{grid-template-columns:1fr 1fr!important;}'+
+    '.card-hd{padding:14px 16px!important;flex-wrap:wrap;gap:6px;}'+
+    '.card-bd{padding:18px 16px!important;}'+
+    '.ctitle{font-size:12px!important;}'+
+    '.steps{grid-template-columns:1fr 1fr 1fr!important;gap:6px!important;}'+
+    '.step{padding:12px 8px!important;font-size:13px!important;}'+
+    '.rc-email{font-size:14px!important;}'+
+    '.rc-id{font-size:13px!important;}'+
+    '.rc-bd{padding:14px!important;}'+
+    '.rk{font-size:12px!important;}'+
+    '.rv{font-size:13px!important;}'+
+    '#tw{bottom:calc(var(--bnav-h) + var(--safe-bottom) + 10px)!important;right:12px;left:12px;}'+
+    '.toast{max-width:100%!important;font-size:14px!important;}'+
+    '.modal-bg{align-items:flex-end!important;padding:0!important;}'+
+    '.modal{border-radius:18px 18px 0 0!important;width:100%!important;max-width:100%!important;padding:22px!important;padding-bottom:max(22px,var(--safe-bottom))!important;}'+
+    '#eod-notes-wrap>div{grid-template-columns:1fr!important;}'+
+    '.charts-row{grid-template-columns:1fr!important;}'+
+    '.lbar{flex-direction:column!important;gap:10px!important;}'+
+    '.lbar .fg,.lbar .fg:first-child,.lbar .fg:nth-child(2){width:100%!important;}'+
+    '.tw{overflow-x:auto!important;-webkit-overflow-scrolling:touch!important;}'+
+    'table{font-size:13px!important;}'+
+    'th,td{padding:10px 12px!important;}'+
+    '#os-next-wrap>div{flex-direction:column!important;align-items:flex-start!important;}'+
+    '#os-next-wrap .btn{width:100%!important;justify-content:center!important;margin-top:10px!important;}'+
+    '.badge{font-size:12px!important;padding:3px 10px!important;}'+
+    '.ci{padding:12px 14px!important;}'+
+    '.cl{font-size:11px!important;}'+
+    '.cv{font-size:15px!important;}'+
+    '.empty{padding:40px 20px!important;}'+
+    '.et{font-size:15px!important;}'+
+    '.es{font-size:13px!important;}';
+  document.head.appendChild(style);
+})();
+
+/* ═══════════════════════════════════════════════════════════════
+   SHARED STATE
+═══════════════════════════════════════════════════════════════ */
+var S={rec:null,lu:[],pend:null};
+
+/* ═══════════════════════════════════════════════════════════════
+   TAB SWITCHING — works for both top tabs AND bottom nav
+═══════════════════════════════════════════════════════════════ */
+function switchTab(n){
+  // Desktop top tabs
+  document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('active');});
+  var dt=document.querySelector('.tab[data-tab="'+n+'"]');
+  if(dt)dt.classList.add('active');
+  // Bottom nav
+  document.querySelectorAll('.bni').forEach(function(x){x.classList.remove('active');});
+  var bn=document.querySelector('.bni[data-tab="'+n+'"]');
+  if(bn)bn.classList.add('active');
+  // Panes
+  document.querySelectorAll('.pane').forEach(function(x){x.classList.remove('active');});
+  document.getElementById('pane-'+n).classList.add('active');
+  // Special on-enter actions
+  if(n==='eod'&&!g('eod-date'))setEODToday();
+  if(n==='inside')ensureChartJs(function(){loadInsideSearch();});
+  if(n==='outside')loadOutsideSearch();
+  if(n==='lookup')loadAllAccounts();
+  if(n==='assign'&&osAssignPrefill)applyOSPrefill();
+  // Scroll to top on mobile
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// Wire up desktop tab clicks
+document.querySelectorAll('.tab').forEach(function(t){
+  t.addEventListener('click',function(){switchTab(this.dataset.tab);});
+});
+
+function setStep(n){for(var i=1;i<=3;i++)document.getElementById('ws-'+i).classList.toggle('active',i<=n);}
+
+/* ═══════════════════════════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════════════════════════ */
+function toast(msg,t){
+  t=t||'info';
+  var w=document.getElementById('tw'),el=document.createElement('div');
+  var ic={ok:'✓',err:'✕',warn:'⚠',info:'ℹ'};
+  el.className='toast t'+t;
+  el.innerHTML='<span>'+(ic[t]||'•')+'</span><span>'+esc(msg)+'</span>';
+  w.appendChild(el);
+  setTimeout(function(){el.style.opacity='0';el.style.transition='opacity .3s';setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el);},350);},(t==='err'?6000:3200));
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ASSIGN CLIENT
+═══════════════════════════════════════════════════════════════ */
+function getBest(){
+  var cn=g('inp-cn'),ap=g('inp-app'),cy=g('inp-cy'),ag=g('inp-ag'),ge=g('inp-ge');
+  if(!cn){toast('Enter a client name.','warn');return;}
+  if(!cy){toast('Enter a city.','warn');return;}
+  setBtn('btn-get',true,'Fetching…');toast('Querying Assignment Engine…','info');
+  gsr('setClientInput',{clientName:cn,app:ap,city:cy,agePref:ag,gender:ge},function(res){setBtn('btn-get',false,'⚡ Get Best Account');S.rec=res;showRec(res);toast('Recommendation loaded.','ok');},function(e){setBtn('btn-get',false,'⚡ Get Best Account');toast(e.message,'err');});
+}
+function loadCur(){toast('Loading…','info');gsr('getRecommendation',{},function(res){S.rec=res;if(res.clientName)s('inp-cn',res.clientName);if(res.appNeeded)s('inp-app',res.appNeeded);if(res.city)s('inp-cy',res.city);if(res.agePref)s('inp-ag',res.agePref);showRec(res);toast('Loaded.','ok');},function(e){toast(e.message,'err');});}
+function showRec(rec){hide('rec-empty');hide('saved-panel');show('rec-panel');renderRec(rec);setStep(2);if(rec.clientName)checkMaxedOutHistory(rec.clientName);loadAccountStatus(rec);}
+function resetAll(){S.rec=null;['inp-cn','inp-cy','inp-ag','inp-log','inp-ova','inp-hld'].forEach(function(id){s(id,'');});s('inp-app','Hinge');s('inp-ge','Male');s('sel-acct','Best Account');hide('rec-panel');hide('saved-panel');show('rec-empty');document.getElementById('rc-container').innerHTML='';var asl=document.getElementById('acct-status-list');if(asl)asl.innerHTML='';hide('acct-status-panel');setStep(1);}
+
+function renderRec(rec){
+  if(!rec||!rec.bestAccountId){document.getElementById('rc-container').innerHTML='<div class="empty"><div class="ei">⚠️</div><div class="et">No recommendation returned</div></div>';return;}
+  var cards=[{l:'Primary Recommendation',c:'prim',id:rec.bestAccountId,em:rec.bestLogin,va:rec.bestOwnerVA||'',ho:rec.bestHolder,sc:rec.bestScore,wy:rec.whyWon,sl:'Best Account'},{l:'Backup 1',c:'',id:rec.backup1||'',em:rec.backup1Login||'',va:rec.backup1Owner||'',ho:'',sc:'',wy:'',sl:'Backup 1'},{l:'Backup 2',c:'',id:rec.backup2||'',em:rec.backup2Login||'',va:rec.backup2Owner||'',ho:'',sc:'',wy:'',sl:'Backup 2'}];
+  var h='';
+  cards.forEach(function(c,i){var empty=!c.id&&!c.em;h+='<div class="rc '+c.c+'" id="rc'+i+'" '+(empty?'style="opacity:.45;cursor:default;"':('onclick="selRc('+i+')"'))+'>'; h+='<div class="rc-hd"><span class="rc-lbl">'+esc(c.l)+'</span>';if(c.sc)h+='<span class="spill">'+esc(String(c.sc))+'</span>';if(empty)h+='<span class="badge bx" style="font-size:10px;">Not available</span>';h+='</div>';if(!empty){h+='<div class="rc-bd">';if(c.id)h+='<div class="rc-id">'+esc(c.id)+'</div>';if(c.em)h+='<div class="rc-email">'+esc(c.em)+'</div>';if(c.va)h+='<div class="rc-row"><span class="rk">Owner VA</span><span class="rv"><strong>'+esc(c.va)+'</strong></span></div>';if(c.ho)h+='<div class="rc-row"><span class="rk">Current Holder</span><span class="rv">'+esc(c.ho)+'</span></div>';if(c.wy)h+='<div class="rc-why">'+esc(c.wy)+'</div>';h+='</div>';}else{h+='<div class="rc-bd" style="padding:10px 14px;"><span style="font-size:12px;color:var(--text-3);">No backup available</span></div>';}h+='</div>';});
+  document.getElementById('rc-container').innerHTML=h;
+  if(rec.bestAccountId)selRc(0);
+}
+function selRc(i){document.querySelectorAll('.rc').forEach(function(c){c.classList.remove('sel');});var c=document.getElementById('rc'+i);if(c)c.classList.add('sel');var r=S.rec;if(!r)return;var m={0:{a:'Best Account',l:r.bestLogin||'',v:r.bestOwnerVA||''},1:{a:'Backup 1',l:r.backup1Login||'',v:r.backup1Owner||''},2:{a:'Backup 2',l:r.backup2Login||'',v:r.backup2Owner||''}};var x=m[i]||m[0];s('sel-acct',x.a);s('inp-log',x.l);s('inp-ova',x.v);}
+function onAcctSel(){var sel=g('sel-acct'),r=S.rec;if(!r)return;if(sel==='Best Account'){s('inp-log',r.bestLogin||'');s('inp-ova',r.bestOwnerVA||'');}else if(sel==='Backup 1'){s('inp-log',r.backup1Login||'');s('inp-ova',r.backup1Owner||'');}else{s('inp-log',r.backup2Login||'');s('inp-ova',r.backup2Owner||'');}}
+
+function doSave(){
+  var r=S.rec;if(!r){toast('Run engine first.','warn');return;}
+  var sel=g('sel-acct'),srch=g('sel-srch'),hld=g('inp-hld'),ova=g('inp-ova'),log=g('inp-log');
+  if(!hld){toast('Enter Assign to VA.','warn');return;}if(!log){toast('No login email.','warn');return;}
+  var aid=sel==='Best Account'?r.bestAccountId:sel==='Backup 1'?r.backup1:r.backup2;
+  setBtn('btn-save',true,'Saving…');toast('Saving…','info');
+  gsr('confirmAssignment',{selectedAccount:sel,searcherType:srch,ownerVA:ova,holderName:hld},function(){gsr('addUsageLog',{accountId:aid,accountLogin:log,clientName:r.clientName||'',city:r.city||'',ownerVA:ova,holderName:hld,app:g('inp-app'),agePref:g('inp-ag'),searcherType:srch},function(){gsr('updateAccountMaster',{accountId:aid,clientName:r.clientName||'',city:r.city||'',holderName:hld},function(){setBtn('btn-save',false,'✓ Confirm & Save to All Sheets');showSaved(r,aid,log,ova,hld,sel,srch);toast('Saved! ✓','ok');},function(e){setBtn('btn-save',false,'✓ Confirm & Save to All Sheets');toast(e.message,'err');});},function(e){setBtn('btn-save',false,'✓ Confirm & Save to All Sheets');toast(e.message,'err');});},function(e){setBtn('btn-save',false,'✓ Confirm & Save to All Sheets');toast(e.message,'err');});
+}
+function showSaved(r,aid,log,ova,hld,sel,srch){setStep(3);hide('rec-panel');show('saved-panel');hide('rec-empty');var flds=[{l:'Client Name',v:r.clientName||''},{l:'Assigned VA',v:hld},{l:'Owner VA',v:ova},{l:'Account ID',v:aid},{l:'Login Email',v:log},{l:'Account Type',v:sel},{l:'App',v:g('inp-app')},{l:'City',v:r.city||g('inp-cy')},{l:'Age Preference',v:r.agePref||g('inp-ag')},{l:'Searcher Type',v:srch}];document.getElementById('saved-summary').innerHTML=flds.map(function(f){return'<div class="ci"><div class="cl">'+esc(f.l)+'</div><div class="cv">'+esc(f.v||'—')+'</div></div>';}).join('');document.getElementById('slack-body').textContent='@'+hld+', please proceed with '+(r.clientName||'[Client]')+'.\n\nApp: '+g('inp-app')+'\nAccount Login: '+log+'\n\nPlease update the Outside Search Dashboard once you start and keep the status accurate.';}
+function copySlack(){var t=document.getElementById('slack-body').textContent;navigator.clipboard?navigator.clipboard.writeText(t).then(function(){toast('Copied! ✓','ok');}):fc(t);}
+function fc(t){var ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);toast('Copied!','ok');}
+
+/* ACCOUNT LOOKUP */
+var luAllRows=[];
+function loadAllAccounts(){document.getElementById('lu-results').innerHTML='<div class="load"><div class="spin"></div>Loading accounts…</div>';gsr('lookupAccount',{query:'',searchType:'all'},function(rows){luAllRows=rows||[];S.lu=luAllRows;renderLU(luAllRows);},function(e){gsr('lookupAccount',{query:'@',searchType:'email'},function(rows){luAllRows=rows||[];S.lu=luAllRows;renderLU(luAllRows);},function(){document.getElementById('lu-results').innerHTML='<div class="empty"><div class="ei">🔍</div><div class="et">Search results appear here</div><div class="es">Search by email, VA name, or assigned client</div></div>';});});}
+
+function doLookup(){var q=document.getElementById('lu-q').value.trim(),st=document.getElementById('lu-type').value;if(!q){if(luAllRows.length){S.lu=luAllRows;renderLU(luAllRows);}else loadAllAccounts();return;}if(luAllRows.length){var ql=q.toLowerCase();var filtered=luAllRows.filter(function(r){if(st==='email')return(r.email||'').toLowerCase().indexOf(ql)!==-1;if(st==='va')return(r.ownerVA||'').toLowerCase().indexOf(ql)!==-1||(r.currentUser||'').toLowerCase().indexOf(ql)!==-1;if(st==='client')return(r.clientAssigned||'').toLowerCase().indexOf(ql)!==-1;return false;});S.lu=filtered;renderLU(filtered);return;}setBtn('btn-srch',true,'⏳');document.getElementById('lu-results').innerHTML='<div class="load"><div class="spin"></div>Searching Account Tracker…</div>';gsr('lookupAccount',{query:q,searchType:st},function(rows){setBtn('btn-srch',false,'Search');S.lu=rows||[];renderLU(rows);},function(e){setBtn('btn-srch',false,'Search');document.getElementById('lu-results').innerHTML='<div class="empty"><div class="ei">❌</div><div class="et">'+esc(e.message)+'</div></div>';toast(e.message,'err');});}
+
+function renderLU(rows){var el=document.getElementById('lu-results');if(!rows||!rows.length){el.innerHTML='<div class="empty"><div class="ei">🔍</div><div class="et">No accounts found</div><div class="es">Try a different search type or term</div></div>';return;}var h='<div class="rcount">'+rows.length+' account(s) found</div><div class="tw"><div class="ts"><table>';h+='<thead><tr><th>Email / Login</th><th>Gender</th><th>Owner VA</th><th>Platform</th><th>Current User</th><th>Client Assigned</th><th>Status</th><th>Last Updated</th><th>Priority</th><th>Actions</th></tr></thead><tbody>';rows.forEach(function(r,i){h+='<tr id="lr'+i+'">';h+='<td class="mc">'+esc(r.email||'')+'</td><td>'+esc(r.gender||'')+'</td><td>'+esc(r.ownerVA||'')+'</td><td>'+abadge(r.app||'')+'</td><td>'+esc(r.currentUser||'')+'</td><td>'+esc(r.clientAssigned||'')+'</td><td>'+sbadge(r.status||'')+'</td><td style="font-size:11px;color:var(--text-3);">'+esc(r.lastUpdated||'')+'</td><td>'+esc(r.priorityTag||'')+'</td>';h+='<td style="white-space:nowrap;"><button class="btn btn-xs btn-ok" onclick="showIF('+i+')">▶ In Use</button> <button class="btn btn-xs btn-del" onclick="doAvail('+i+')">◻ Available</button></td></tr>';h+='<tr id="if'+i+'" class="hidden"><td colspan="10"><div class="ia"><span class="ilbl">Set In Use —</span><input type="text" id="ifva'+i+'" placeholder="VA Name"><input type="text" id="ifcl'+i+'" placeholder="Client Name"><button class="btn btn-xs btn-ok" onclick="doInUse('+i+')">Confirm</button><button class="btn btn-xs btn-g" onclick="hideIF('+i+')">Cancel</button></div></td></tr>';h+='<tr id="sr'+i+'" class="hidden"><td colspan="10"><div class="si-wrap"><div class="si-lbl">📨 Slack Message</div><div class="si-body" id="si'+i+'"></div><button class="btn btn-xs btn-g" onclick="copySI('+i+')">📋 Copy</button></div></td></tr>';});h+='</tbody></table></div></div>';el.innerHTML=h;}
+function showIF(i){document.getElementById('if'+i).classList.remove('hidden');}
+function hideIF(i){document.getElementById('if'+i).classList.add('hidden');}
+function doInUse(i){var r=S.lu[i],va=document.getElementById('ifva'+i).value.trim(),cl=document.getElementById('ifcl'+i).value.trim();if(!va||!cl){toast('Enter both VA Name and Client Name.','warn');return;}var em=r.email,same=S.lu.filter(function(x){return x.email===em;});if(same.length>1){S.pend={email:em,status:'In Use',vaName:va,clientName:cl,idx:i};document.getElementById('amsub').textContent='The email "'+em+'" appears on multiple apps. Which app should be set to In Use?';openAM();}else{execStatus({email:em,app:r.app,status:'In Use',vaName:va,clientName:cl,idx:i});}}
+function doAvail(i){var r=S.lu[i],em=r.email,same=S.lu.filter(function(x){return x.email===em;});if(same.length>1){S.pend={email:em,status:'Available',vaName:'',clientName:'',idx:i};document.getElementById('amsub').textContent='The email "'+em+'" appears on multiple apps. Which app should be set to Available?';openAM();}else{execStatus({email:em,app:r.app,status:'Available',vaName:'',clientName:'',idx:i});}}
+function execStatus(p){toast('Updating…','info');gsr('setAccountStatus',{email:p.email,app:p.app,status:p.status,vaName:p.vaName,clientName:p.clientName},function(res){if(res&&res.success===false){toast(res.message,'err');return;}toast('Status set to '+p.status+' ('+p.app+') ✓','ok');hideIF(p.idx);if(p.status==='In Use'){var sl='Hi '+p.vaName+', you have been assigned an account.\n\nApp: '+p.app+'\nAccount Login: '+p.email+'\nClient: '+p.clientName+'\n\nPlease update the Outside Search Dashboard once you start.';var b=document.getElementById('si'+p.idx);if(b)b.textContent=sl;var rr=document.getElementById('sr'+p.idx);if(rr)rr.classList.remove('hidden');}doLookup();},function(e){toast(e.message,'err');});}
+function copySI(i){var el=document.getElementById('si'+i);if(!el)return;navigator.clipboard?navigator.clipboard.writeText(el.textContent).then(function(){toast('Copied!','ok');}):fc(el.textContent);}
+function openAM(){document.getElementById('ch-hinge').classList.add('picked');document.getElementById('ch-bumble').classList.remove('picked');document.querySelector('input[value="Hinge"]').checked=true;document.getElementById('app-modal').classList.add('open');}
+function closeAM(){document.getElementById('app-modal').classList.remove('open');S.pend=null;}
+function confirmAM(){document.getElementById('app-modal').classList.remove('open');if(!S.pend)return;var pk=document.querySelector('input[name="app-pick"]:checked'),app=pk?pk.value:'Hinge',p=S.pend;S.pend=null;execStatus({email:p.email,app:app,status:p.status,vaName:p.vaName,clientName:p.clientName,idx:p.idx});}
+document.querySelectorAll('.apc').forEach(function(el){el.addEventListener('click',function(){document.querySelectorAll('.apc').forEach(function(x){x.classList.remove('picked');});this.classList.add('picked');});});
+
+/* EOD */
+function runDebug(){toast('Running debug…','info');var date=g('eod-date')||'(no date entered)';gsr('getUsageLogAllRows',{},function(res){var rows=res.rows||[];var dates={};rows.forEach(function(r){var d=String(r[0]);dates[d]=(dates[d]||0)+1;});var dateList=Object.keys(dates).sort().slice(-10);var msg='Sheet: '+(res.error||'OK')+'\n'+'Total rows returned: '+rows.length+'\n'+'You entered: "'+date+'"\n'+'Last 10 unique dates in log:\n  '+dateList.map(function(d){return d+' ('+dates[d]+' rows)';}).join('\n  ');alert(msg);},function(e){toast('Debug failed: '+e.message,'err');});}
+
+function setEODToday(){var now=new Date();s('eod-date',(now.getMonth()+1)+'/'+(now.getDate())+'/'+now.getFullYear());}
+
+function loadEOD(){var date=g('eod-date');if(!date){toast('Enter a report date.','warn');return;}setBtn('btn-eod',true,'Loading…');document.getElementById('eod-table-wrap').innerHTML='<div class="load"><div class="spin"></div>Pulling from Usage Log…</div>';document.getElementById('eod-stats').style.display='none';document.getElementById('eod-slack-card').classList.add('hidden');var allRows=null,insideSummary=null,osStatus=null,maxedToday=null,done=0;function tryRender(){done++;if(done<4)return;setBtn('btn-eod',false,'📊 Generate Report');var filtered=[];if(allRows&&allRows.rows){filtered=allRows.rows.filter(function(r){return String(r[0]).trim()===date;});}renderEOD(filtered,date,insideSummary||{},osStatus||{},maxedToday||[]);}gsr('getUsageLogAllRows',{},function(res){allRows=res;tryRender();},function(e){toast('Usage Log error: '+e.message,'err');allRows={rows:[]};tryRender();});gsr('getEODInsideSummary',{},function(s){insideSummary=s;tryRender();},function(){insideSummary={};tryRender();});gsr('getOutsideSearchStatus',{},function(s){osStatus=s;tryRender();},function(){osStatus={};tryRender();});gsr('getMaxedOutToday',{},function(rows){maxedToday=rows||[];tryRender();},function(){maxedToday=[];tryRender();});}
+
+function renderEOD(rows,date,inside,osStatus,maxedToday){var wrap=document.getElementById('eod-table-wrap');if(osStatus&&(osStatus.total||osStatus.inProgress)){document.getElementById('eos-total').textContent=osStatus.total||0;document.getElementById('eos-overdue').textContent=osStatus.activeOverdue||0;document.getElementById('eos-duetoday').textContent=osStatus.dueToday||0;document.getElementById('eos-notstarted').textContent=osStatus.notStarted||0;document.getElementById('eos-inprogress').textContent=osStatus.inProgress||0;document.getElementById('eos-pending').textContent=osStatus.pending||0;document.getElementById('eod-os-stats').style.display='';}if(!rows||!rows.length){wrap.innerHTML='<div class="empty"><div class="ei">📋</div><div class="et">No assignments found for '+esc(date)+'</div><div class="es">Check the date format matches your Usage Log (e.g. 5/16/2026)</div><div style="margin-top:12px;"><button class="btn btn-g btn-sm" onclick="runDebug()">🔍 Debug sheet</button></div></div>';renderInsideEODStats(inside||{});buildEODSlack([],date,0,0,inside||{},osStatus||{},maxedToday||[]);return;}var hingeCount=0,bumbleCount=0,vaSet={};rows.forEach(function(r){var app=String(r[2]||'').toLowerCase();if(app.includes('hinge'))hingeCount++;else if(app.includes('bumble'))bumbleCount++;var holder=String(r[12]||r[5]||'').trim();if(holder)vaSet[holder]=true;});var statsEl=document.getElementById('eod-stats');document.getElementById('eod-count').textContent=rows.length;document.getElementById('eod-hinge').textContent=hingeCount;document.getElementById('eod-bumble').textContent=bumbleCount;document.getElementById('eod-vas').textContent=Object.keys(vaSet).length;statsEl.style.display='';renderInsideEODStats(inside||{});var h='<div class="tw"><div class="ts"><table><thead><tr>';['Client','App','Account ID','Login','Owner VA','Assigned VA','City','Age Pref','Type'].forEach(function(x){h+='<th>'+x+'</th>';});h+='</tr></thead><tbody>';rows.forEach(function(r){h+='<tr>';h+='<td style="font-weight:500;">'+esc(String(r[1]||''))+'</td>';h+='<td>'+appBadge(String(r[2]||''))+'</td>';h+='<td class="mc">'+esc(String(r[3]||''))+'</td>';h+='<td class="mc" style="font-size:11px;">'+esc(String(r[4]||''))+'</td>';h+='<td>'+esc(String(r[5]||''))+'</td>';h+='<td>'+esc(String(r[12]||''))+'</td>';h+='<td>'+esc(String(r[6]||''))+'</td>';h+='<td>'+esc(String(r[8]||''))+'</td>';h+='<td>'+esc(String(r[10]||''))+'</td>';h+='</tr>';});h+='</tbody></table></div></div>';wrap.innerHTML=h;buildEODSlack(rows,date,hingeCount,bumbleCount,inside||{},osStatus||{},maxedToday||[]);}
+
+function renderInsideEODStats(inside){var el=document.getElementById('eod-inside-stats');if(!el){el=document.createElement('div');el.id='eod-inside-stats';el.style.marginTop='18px';document.getElementById('eod-stats').parentNode.insertBefore(el,document.getElementById('eod-table-wrap'));}if(!inside||!inside.total){el.innerHTML='';return;}el.innerHTML='<div style="margin-bottom:10px;"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.9px;color:var(--text-3);margin-bottom:8px;">Inside Search — Current Standing</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;"><div class="ci" style="text-align:center;"><div class="cl">Total clients</div><div class="cv" style="font-size:18px;font-weight:700;">'+((inside.total)||0)+'</div></div><div class="ci" style="text-align:center;background:var(--red-bg);"><div class="cl" style="color:var(--red);">Overdue</div><div class="cv" style="font-size:18px;font-weight:700;color:var(--red);">'+((inside.overdue)||0)+'</div></div><div class="ci" style="text-align:center;background:var(--amber-bg);"><div class="cl" style="color:var(--amber);">Due today</div><div class="cv" style="font-size:18px;font-weight:700;color:var(--amber);">'+((inside.dueToday)||0)+'</div></div><div class="ci" style="text-align:center;"><div class="cl">In progress</div><div class="cv" style="font-size:18px;font-weight:700;">'+((inside.inProcess)||0)+'</div></div><div class="ci" style="text-align:center;background:var(--green-bg);"><div class="cl" style="color:var(--green);">Done</div><div class="cv" style="font-size:18px;font-weight:700;color:var(--green);">'+((inside.done)||0)+'</div></div></div></div>';}
+
+function buildEODSlack(rows,date,hingeCount,bumbleCount,inside,osStatus,maxedToday){var name=g('eod-name')||'Team';var notes=document.getElementById('eod-notes')?document.getElementById('eod-notes').value.trim():'';var maxedTxt=document.getElementById('eod-maxed')?document.getElementById('eod-maxed').value.trim():'';var total=rows.length;var byVA={};rows.forEach(function(r){var va=String(r[12]||r[5]||'Unknown').trim();if(!byVA[va])byVA[va]=[];byVA[va].push(r);});var lines=[];lines.push('*EOD Report — '+date+'*');lines.push('Submitted by: '+name);lines.push('');lines.push('*Outside Search — Accounts Assigned Today*');if(total>0){lines.push('• Total assigned: '+total+' | Hinge: '+hingeCount+' | Bumble: '+bumbleCount);lines.push('');Object.keys(byVA).sort().forEach(function(va){lines.push('*'+va+'* ('+byVA[va].length+' assignment'+(byVA[va].length!==1?'s':'')+')');byVA[va].forEach(function(r){var client=String(r[1]||'').trim(),app=String(r[2]||'').trim(),city=String(r[6]||'').trim(),age=String(r[8]||'').trim();lines.push('  • '+client+' — '+app+(city?' | '+city:'')+(age?' | '+age:''));});});}else{lines.push('• No accounts assigned today');}lines.push('');lines.push('*Outside Search — Current Status*');lines.push('- Search In Progress: '+(osStatus.inProgress||0));lines.push('- Active Overdue: '+(osStatus.activeOverdue||0)+'  (excludes Done, Maxed Out, FC Needed)');var hasAutoMaxed=maxedToday&&maxedToday.length>0;var hasManualMaxed=maxedTxt.trim().length>0;if(hasAutoMaxed||hasManualMaxed){lines.push('');lines.push('*Maxed Out Today*');if(hasAutoMaxed){maxedToday.forEach(function(m){var appTag=m.app?(' ['+m.app+']'):'';var line='  • '+m.client+' — '+m.account+appTag;if(m.notes)line+=' | '+m.notes;lines.push(line);});}if(hasManualMaxed){maxedTxt.split('\n').forEach(function(l){if(l.trim())lines.push('  • '+l.trim());});}}lines.push('');lines.push('*Inside Search — Current Standing*');if(inside&&inside.total){lines.push('• Total clients: '+inside.total+' | In Progress: '+(inside.inProcess||0)+' | Done: '+(inside.done||0));lines.push('• Overdue: '+(inside.overdue||0)+' | Due Today: '+(inside.dueToday||0)+' | Not Started: '+(inside.notStarted||0));}else{lines.push('• Could not load Inside Search data');}if(notes){lines.push('');lines.push('*Notes / Issues*');lines.push(notes);}lines.push('');lines.push('✅ All assignments have been logged in the Outside Search Dashboard.');document.getElementById('eod-slack-box').textContent=lines.join('\n');document.getElementById('eod-slack-card').classList.remove('hidden');}
+
+function copyEODSlack(){var t=document.getElementById('eod-slack-box').textContent;navigator.clipboard?navigator.clipboard.writeText(t).then(function(){toast('EOD report copied! ✓','ok');}):fc(t);}
+function appBadge(a){var l=String(a||'').toLowerCase();if(l.includes('hinge'))return'<span class="badge bh">Hinge</span>';if(l.includes('bumble'))return'<span class="badge bb">Bumble</span>';return'<span class="badge bx">'+esc(a)+'</span>';}
+
+/* INSIDE SEARCH */
+var isBarChart=null,isDonutChart=null;
+function loadInsideSearch(){setBtn('btn-is-refresh',true,'Loading…');var vaData=null,overdueData=null,done=0;function tryRender(){done++;if(done<2)return;setBtn('btn-is-refresh',false,'↺ Refresh');if(vaData&&!vaData.error)renderInsideSearch(vaData.rows,overdueData||[]);else toast((vaData&&vaData.error)||'Failed to load Inside Search','err');}gsr('getInsideSearchDashboard',{},function(d){vaData=d;tryRender();},function(e){vaData={error:e.message};tryRender();});gsr('getOverdueClients',{},function(d){overdueData=d;tryRender();},function(){overdueData=[];tryRender();});}
+
+function renderInsideSearch(rows,overdue){if(!rows||!rows.length){document.getElementById('is-table-wrap').innerHTML='<div class="empty"><div class="ei">📊</div><div class="et">No data found</div></div>';return;}var totals={total:0,dueToday:0,overdue:0,due3Days:0,inProcess:0,notStarted:0,reviewing:0,done:0};rows.forEach(function(r){Object.keys(totals).forEach(function(k){totals[k]+=(r[k]||0);});});var stats=[{l:'Total VAs',v:rows.length,bg:'',tc:''},{l:'Total clients',v:totals.total,bg:'',tc:''},{l:'Overdue',v:overdue.length,bg:'var(--red-bg)',tc:'var(--red)'},{l:'Due today',v:totals.dueToday,bg:'var(--amber-bg)',tc:'var(--amber)'},{l:'Due in 3 days',v:totals.due3Days,bg:'var(--amber-bg)',tc:'var(--amber)'},{l:'In progress',v:totals.inProcess,bg:'',tc:''},{l:'Done',v:totals.done,bg:'var(--green-bg)',tc:'var(--green)'}];document.getElementById('is-stats').innerHTML=stats.map(function(s){return'<div style="background:'+(s.bg||'var(--card)')+';border:1px solid var(--border);border-radius:var(--r-md);padding:13px 16px;box-shadow:var(--sh-sm);"><div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--text-3);margin-bottom:4px;">'+esc(s.l)+'</div><div style="font-size:24px;font-weight:600;color:'+(s.tc||'var(--text-1)')+';">'+s.v+'</div></div>';}).join('');
+  // Update bnav badge
+  if(overdue.length>0){var b=document.getElementById('bnav-inside-badge');if(b){b.textContent=overdue.length;b.classList.remove('hidden');}}
+  var names=rows.map(function(r){return r.vaName;}),totalsArr=rows.map(function(r){return r.total;}),barColors=rows.map(function(r){return(r.overdue>0||r.dueToday>0)?'#c84040':'#555555';});if(isBarChart){isBarChart.destroy();}isBarChart=new Chart(document.getElementById('is-bar-chart'),{type:'bar',data:{labels:names,datasets:[{label:'Clients',data:totalsArr,backgroundColor:barColors,borderRadius:4,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#777',font:{size:10},autoSkip:false,maxRotation:35},grid:{display:false},border:{display:false}},y:{ticks:{color:'#777',font:{size:10}},grid:{color:'rgba(128,128,128,0.12)'},border:{display:false}}}}});var donutData=[totals.inProcess,totals.done,totals.notStarted,totals.reviewing],donutLabels=['In progress','Done','Not started','Reviewing'],donutColors=['#555555','#888888','#aaaaaa','#333333'];document.getElementById('is-donut-legend').innerHTML=donutLabels.map(function(l,i){return'<span style="display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:2px;background:'+donutColors[i]+';display:inline-block;"></span>'+esc(l)+' '+donutData[i]+'</span>';}).join('');if(isDonutChart){isDonutChart.destroy();}isDonutChart=new Chart(document.getElementById('is-donut-chart'),{type:'doughnut',data:{labels:donutLabels,datasets:[{data:donutData,backgroundColor:donutColors,borderWidth:0,hoverOffset:4}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{display:false}}}});var th='<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:12px;"><thead><tr>';['VA Name','Total','Due Today','Overdue','Due 3 Days','In Process','Not Started','Reviewing','Done'].forEach(function(h){th+='<th style="padding:9px 12px;background:var(--surface);color:var(--text-3);font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;border-bottom:1px solid var(--border);text-align:'+(h==='VA Name'?'left':'center')+';">'+h+'</th>';});th+='</tr></thead><tbody>';rows.forEach(function(r){var urgent=r.overdue>0||r.dueToday>0;var rowBg=urgent?'background:var(--red-bg);':'';th+='<tr style="'+rowBg+'">';th+='<td style="padding:9px 12px;font-weight:500;color:var(--text-1);white-space:nowrap;">'+esc(r.vaName)+'</td>';var cells=[r.total,r.dueToday,r.overdue,r.due3Days,r.inProcess,r.notStarted,r.reviewing,r.done],flags=[false,r.dueToday>0,r.overdue>0,r.due3Days>0,false,false,false,r.done>0];cells.forEach(function(v,ci){var color=flags[ci]?(ci===2?'var(--red)':(ci===7?'var(--green)':'var(--amber)')):'var(--text-2)';var fw=flags[ci]?'600':'400';th+='<td style="padding:9px 12px;text-align:center;color:'+color+';font-weight:'+fw+';">'+v+'</td>';});th+='</tr>';});th+='</tbody></table></div>';document.getElementById('is-table-wrap').innerHTML=th;var ow=document.getElementById('is-overdue-wrap');document.getElementById('is-overdue-count').textContent='Loading…';gsr('getInsideSearchOverdue',{},function(overdueRows){var all=overdueRows||[];var vaNames={};all.forEach(function(r){vaNames[r.vaName]=true;});var vaList=Object.keys(vaNames).sort();function renderOverdue(filterVA){var filtered=filterVA?all.filter(function(r){return r.vaName===filterVA;}):all;var count=filtered.length;document.getElementById('is-overdue-count').textContent=count+' client'+(count!==1?'s':'')+' overdue or due today'+(filterVA?' — '+filterVA:'');var pills='<div style="display:flex;gap:6px;flex-wrap:wrap;padding:10px 20px;border-bottom:1px solid var(--border-soft);">';pills+='<button class="btn btn-xs '+(filterVA===''?'btn-p':'btn-g')+'" onclick="isOverdueFilter(\'\')">All ('+all.length+')</button>';vaList.forEach(function(va){var vaCount=all.filter(function(r){return r.vaName===va;}).length;var safe=va.replace(/\\/g,'\\\\').replace(/'/g,"\\'");pills+='<button class="btn btn-xs '+(filterVA===va?'btn-p':'btn-g')+'" onclick="isOverdueFilter(\''+safe+'\')">'+esc(va)+' ('+vaCount+')</button>';});pills+='</div>';if(!filtered.length){ow.innerHTML=pills+'<div class="empty" style="padding:24px;"><div class="ei" style="font-size:20px;">✓</div><div class="et">No overdue or due-today clients'+(filterVA?' for '+esc(filterVA):'')+' </div></div>';return;}var oh=pills+'<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:12.5px;"><thead><tr><th style="padding:9px 12px;background:var(--surface);color:var(--text-3);font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;border-bottom:1px solid var(--border);text-align:left;">Client</th><th style="padding:9px 12px;background:var(--surface);color:var(--text-3);font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;border-bottom:1px solid var(--border);">VA</th><th style="padding:9px 12px;background:var(--surface);color:var(--text-3);font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;border-bottom:1px solid var(--border);">Due Date</th><th style="padding:9px 12px;background:var(--surface);color:var(--text-3);font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;border-bottom:1px solid var(--border);">Status</th><th style="padding:9px 12px;background:var(--surface);color:var(--text-3);font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;border-bottom:1px solid var(--border);">Days</th></tr></thead><tbody>';filtered.forEach(function(c){var isToday=c.daysOver===0;var rowBg=isToday?'background:var(--amber-bg);':'background:var(--red-bg);';oh+='<tr style="'+rowBg+'border-bottom:1px solid var(--border-soft);">';oh+='<td style="padding:9px 12px;font-weight:500;color:var(--text-1);">'+esc(c.client)+'</td>';oh+='<td style="padding:9px 12px;color:var(--text-2);">'+esc(c.vaName)+'</td>';oh+='<td style="padding:9px 12px;color:'+(isToday?'var(--amber)':'var(--red)')+';font-weight:500;">'+esc(c.dueDate)+'</td>';oh+='<td style="padding:9px 12px;color:var(--text-3);">'+esc(c.status||'—')+'</td>';oh+='<td style="padding:9px 12px;">';if(isToday){oh+='<span style="font-size:11px;font-weight:600;background:var(--amber-bg);color:var(--amber);padding:3px 9px;border-radius:99px;border:1px solid var(--amber-border);">Due today</span>';}else{oh+='<span style="font-size:11px;font-weight:600;background:var(--red-bg);color:var(--red);padding:3px 9px;border-radius:99px;border:1px solid var(--red-border);">'+c.daysOver+' day'+(c.daysOver!==1?'s':'')+' overdue</span>';}oh+='</td></tr>';});oh+='</tbody></table></div>';ow.innerHTML=oh;}window.isOverdueFilter=function(va){renderOverdue(va);};renderOverdue('');},function(){ow.innerHTML='<div class="empty"><div class="es">Could not load VA sheets</div></div>';});}
+
+var chartJsLoaded=false;
+function ensureChartJs(cb){if(chartJsLoaded){cb();return;}var s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js';s.onload=function(){chartJsLoaded=true;cb();};document.head.appendChild(s);}
+
+/* OUTSIDE SEARCH AUTO-FILL */
+var osAllClients=[],autoFillTimer=null;
+function onClientNameInput(val){if(!val.trim()){document.getElementById('cy-hint').style.display='none';document.getElementById('ag-hint').style.display='none';return;}clearTimeout(autoFillTimer);autoFillTimer=setTimeout(function(){tryAutoFill(val.trim());},400);}
+function tryAutoFill(name){if(!name)return;var q=name.toLowerCase();if(osAllClients.length){var m=findClientMatch(q);if(m){applyAutoFill(m);return;}}gsr('getOutsideSearchClients',{},function(rows){osAllClients=rows||[];var m=findClientMatch(q);if(m)applyAutoFill(m);},function(){});}
+function findClientMatch(q){for(var i=0;i<osAllClients.length;i++){var n=String(osAllClients[i][0]||'').toLowerCase().trim();if(n===q||n.indexOf(q)===0)return osAllClients[i];}return null;}
+function applyAutoFill(row){var city=String(row[3]||'').trim(),age=String(row[2]||'').trim();if(city){s('inp-cy',city);document.getElementById('cy-hint').style.display='';}if(age){s('inp-ag',age);document.getElementById('ag-hint').style.display='';}}
+
+/* OUTSIDE SEARCH DASHBOARD */
+var osRawRows=[],osActiveFilter='',osOverdueOpen=false,osSearchQuery='',osEditRow=null,osAssignRow=null;
+var OS_STATUS_OPTIONS=['Not Started','Need More Profile','Search In Progress','Rework Needed','Pending Next Batch','PAUSE SEARCH (RE-PRIORITIZED)','FC Needed','Done','Maxed out','MAXED OUT ALL','DONE'];
+var OS_EXCLUDE_OVERDUE=['done','maxed out','fc needed','completed'];
+
+function loadOutsideSearch(){setBtn('btn-os-refresh',true,'Loading...');document.getElementById('os-table-wrap').innerHTML='<div class="load"><div class="spin"></div>Loading...</div>';var clientsDone=false,timerDone=false,clientRows=[],timerRows=[];function tryRender(){if(!clientsDone||!timerDone)return;setBtn('btn-os-refresh',false,'Refresh');osAllClients=clientRows;osRawRows=clientRows;renderOutsideSearch();renderTimerFlags(timerRows);}gsr('getOutsideSearchClients',{},function(rows){clientRows=rows||[];clientsDone=true;tryRender();},function(e){clientsDone=true;toast(e.message,'err');tryRender();});gsr('getSearchTimerFlags',{},function(rows){timerRows=rows||[];timerDone=true;tryRender();},function(){timerDone=true;tryRender();});}
+
+function renderOutsideSearch(){var rows=osRawRows;if(!rows||!rows.length){document.getElementById('os-stats').innerHTML='';document.getElementById('os-table-wrap').innerHTML='<div class="empty"><div class="ei">No data</div></div>';return;}var today=new Date();today.setHours(0,0,0,0);var total=rows.length,overdue=0,dueToday=0,inProgress=0,notStarted=0,pending=0;var OS_ACTIVE_OVERDUE=['search in progress','rework needed','pending next batch','need more profile','not started','pause search'];var OS_OVERDUE_EXCLUDE=['done','fc needed','completed','maxed out'];rows.forEach(function(r){var status=String(r[4]||'').toLowerCase().trim();var due=parseDue(r[1]);if(due){if(due.getTime()===today.getTime())dueToday++;if(due<today){var isExcluded=OS_OVERDUE_EXCLUDE.some(function(ex){return status.includes(ex);});var isActive=OS_ACTIVE_OVERDUE.some(function(st){return status.includes(st);});if(!isExcluded&&isActive)overdue++;}}if(status==='search in progress')inProgress++;if(status==='not started')notStarted++;if(status.includes('pending'))pending++;});
+  // Update bnav badge for outside overdue
+  if(overdue>0){var ob=document.getElementById('bnav-outside-badge');if(ob){ob.textContent=overdue;ob.classList.remove('hidden');}}
+  var stats=[{l:'Total',v:total,bg:'',tc:''},{l:'Overdue',v:overdue,bg:'var(--red-bg)',tc:'var(--red)'},{l:'Due Today',v:dueToday,bg:'var(--amber-bg)',tc:'var(--amber)'},{l:'Not Started',v:notStarted,bg:'',tc:'var(--text-2)'},{l:'In Progress',v:inProgress,bg:'',tc:''},{l:'Pending Batch',v:pending,bg:'',tc:'var(--text-3)'}];document.getElementById('os-stats').innerHTML=stats.map(function(st){return'<div style="background:'+(st.bg||'var(--card)')+';border:1px solid var(--border);border-radius:var(--r-md);padding:13px 16px;box-shadow:var(--sh-sm);"><div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--text-3);margin-bottom:4px;">'+esc(st.l)+'</div><div style="font-size:24px;font-weight:600;color:'+(st.tc||'var(--text-1)')+';">'+st.v+'</div></div>';}).join('');var OS_EXCLUDE_QUEUE=['search in progress','maxed out','fc needed','done','maxed out all','done'];var queue=rows.filter(function(r){var st=String(r[4]||'').toLowerCase().trim();return r[1]&&!OS_EXCLUDE_QUEUE.some(function(ex){return st===ex||st.includes(ex);});});queue.sort(function(a,b){return(parseDue(a[1])||new Date(9e9))-(parseDue(b[1])||new Date(9e9));});var nw=document.getElementById('os-next-wrap');if(queue.length){var nx=queue[0];var nxDue=parseDue(nx[1]);var nxDueStr=nxDue?((nxDue.getMonth()+1)+'/'+nxDue.getDate()+'/'+nxDue.getFullYear()):nx[1];nw.innerHTML='<div style="background:var(--amber-bg);border:1px solid var(--amber-border);border-radius:var(--r-md);padding:13px 18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;"><div><div style="font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--amber);margin-bottom:4px;">Next to assign</div><div style="font-size:15px;font-weight:600;color:var(--text-1);">'+esc(String(nx[0]||''))+'</div><div style="font-size:11.5px;color:var(--text-3);margin-top:2px;">Due '+nxDueStr+(nx[3]?' - '+esc(nx[3]):'')+(nx[2]?' - '+esc(nx[2]):'')+' · '+esc(String(nx[4]||''))+'</div></div><button class="btn btn-p btn-sm" onclick="openAssignModal('+nx[6]+')">Assign now</button></div>';nw.classList.remove('hidden');}else{nw.innerHTML='<div style="background:var(--green-bg);border:1px solid var(--green-border);border-radius:var(--r-md);padding:11px 18px;font-size:13px;color:var(--green);font-weight:500;">No clients pending assignment</div>';nw.classList.remove('hidden');}var allStatuses={};rows.forEach(function(r){var st=String(r[4]||'').trim();if(st)allStatuses[st]=(allStatuses[st]||0)+1;});var pills='<button class="btn btn-xs '+(osActiveFilter===''?'btn-p':'btn-g')+'" onclick="setOSFilter(\'\')" style="margin-bottom:4px;">All ('+rows.length+')</button> ';Object.keys(allStatuses).sort().forEach(function(st){var safeSt=st.replace(/\\/g,'\\\\').replace(/'/g,"\\'");pills+='<button class="btn btn-xs '+(osActiveFilter===st?'btn-p':'btn-g')+'" onclick="setOSFilter(\''+safeSt+'\')" style="margin-bottom:4px;">'+esc(st)+' ('+allStatuses[st]+')</button> ';});document.getElementById('os-filters').innerHTML=pills;var sb=document.getElementById('os-search-bar');if(!sb){var sbDiv=document.createElement('div');sbDiv.style.cssText='margin-bottom:12px;';sbDiv.innerHTML='<input type="text" id="os-search-bar" placeholder="Search client name..." oninput="setOSSearch(this.value)" style="max-width:300px;">';document.getElementById('os-filters').parentNode.insertBefore(sbDiv,document.getElementById('os-filters'));}var filtered=osActiveFilter===''?rows:rows.filter(function(r){return String(r[4]||'').trim()===osActiveFilter;});if(osSearchQuery){var q=osSearchQuery.toLowerCase();filtered=filtered.filter(function(r){return String(r[0]||'').toLowerCase().indexOf(q)!==-1;});}if(!filtered.length){document.getElementById('os-table-wrap').innerHTML='<div class="empty"><div class="ei">No clients match</div></div>';}else{var h='<div class="tw"><div class="ts"><table><thead><tr><th>Client</th><th>Due Date</th><th>Primary VA</th><th>Secondary VA</th><th>City</th><th>Age Pref</th><th># Women</th><th>Status (col R)</th><th>Actions</th></tr></thead><tbody>';filtered.forEach(function(r){var due=parseDue(r[1]);var overR=due&&due<today;var dueStr=due?((due.getMonth()+1)+'/'+due.getDate()+'/'+due.getFullYear()):r[1]||'--';var ri=r[6];var isEditing=osEditRow===ri;h+='<tr id="osr-'+ri+'">';h+='<td style="font-weight:500;color:var(--text-1);">'+esc(String(r[0]||''))+'</td>';h+='<td style="'+(overR?'color:var(--red);font-weight:600;':'')+'">'+dueStr+'</td>';h+='<td>'+esc(String(r[7]||'--'))+'</td>';h+='<td style="color:var(--text-3);">'+esc(String(r[8]||'--'))+'</td>';h+='<td>'+esc(String(r[3]||''))+'</td>';h+='<td>'+esc(String(r[2]||''))+'</td>';h+='<td>'+esc(String(r[5]||''))+'</td>';h+='<td>'+osStatusBadge(String(r[4]||''))+'</td>';h+='<td style="white-space:nowrap;"><div style="display:flex;gap:5px;"><button class="btn btn-xs btn-g" onclick="toggleOSEdit('+ri+')">Edit</button><button class="btn btn-xs btn-ok" onclick="openAssignModal('+ri+')">Assign</button></div></td>';h+='</tr>';if(isEditing){var statusOpts=OS_STATUS_OPTIONS.map(function(opt){return'<option value="'+esc(opt)+'"'+(opt===String(r[4]||'')?'selected':'')+'>'+esc(opt)+'</option>';}).join('');h+='<tr style="background:var(--accent-light);"><td colspan="9" style="padding:12px 14px;"><div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;"><div class="fg" style="flex:0 0 140px;"><label>Due Date (col B)</label><input type="text" id="edit-date-'+ri+'" value="'+esc(dueStr)+'"></div><div class="fg" style="flex:0 0 240px;"><label>Status (col R)</label><select id="edit-status-'+ri+'" onchange="onEditStatusChange('+ri+')">'+statusOpts+'</select></div><div class="fg hidden" id="maxed-field-'+ri+'" style="flex:0 0 200px;"><label>Maxed Account <span class="lnote">(email)</span></label><input type="text" id="edit-maxed-'+ri+'" placeholder="e.g. alyjones206@icloud.com"></div><div class="fg hidden" id="maxed-app-field-'+ri+'" style="flex:0 0 120px;"><label>App</label><select id="edit-maxed-app-'+ri+'"><option value="HNG">HNG (Hinge)</option><option value="BMB">BMB (Bumble)</option><option value="Both">Both</option></select></div><div class="fg hidden" id="maxed-notes-field-'+ri+'" style="flex:1;min-width:160px;"><label>Why maxed out <span class="lnote">(optional)</span></label><input type="text" id="edit-maxed-notes-'+ri+'" placeholder="e.g. Too many likes, filter issue"></div><div style="display:flex;gap:6px;padding-bottom:2px;"><button class="btn btn-ok btn-sm" onclick="saveInlineEdit('+ri+')">Save</button><button class="btn btn-g btn-sm" onclick="toggleOSEdit(null)">Cancel</button></div></div></td></tr>';}});h+='</tbody></table></div></div>';document.getElementById('os-table-wrap').innerHTML=h;}var overdueActive=rows.filter(function(r){var st=String(r[4]||'').toLowerCase().trim();var due=parseDue(r[1]);if(due)due.setHours(0,0,0,0);return due&&due<today&&!OS_EXCLUDE_OVERDUE.some(function(ex){return st.includes(ex);});});overdueActive.sort(function(a,b){return(parseDue(a[1])||0)-(parseDue(b[1])||0);});document.getElementById('os-overdue-badge').textContent=overdueActive.length+' active';if(!overdueActive.length){document.getElementById('os-overdue-list').innerHTML='<div class="empty" style="padding:24px;"><div class="et">No active overdue clients</div></div>';}else{var oh='<div>';overdueActive.forEach(function(c,idx){var due=parseDue(c[1]);var days=due?Math.floor((today-due)/864e5):0;var dueStr=due?((due.getMonth()+1)+'/'+due.getDate()+'/'+due.getFullYear()):c[1];oh+='<div style="display:flex;justify-content:space-between;align-items:center;padding:11px 20px;border-bottom:'+(idx<overdueActive.length-1?'1px solid var(--border-soft)':'none')+';">';oh+='<div><div style="font-size:13px;font-weight:500;color:var(--text-1);">'+esc(String(c[0]||''))+'</div>';oh+='<div style="font-size:11px;color:var(--text-3);margin-top:2px;">Due '+dueStr+' - '+esc(String(c[4]||'--'))+(c[3]?' - '+esc(c[3]):'')+'</div></div>';oh+='<div style="display:flex;align-items:center;gap:8px;"><span style="font-size:11px;font-weight:600;background:var(--red-bg);color:var(--red);padding:3px 10px;border-radius:99px;border:1px solid var(--red-border);">'+days+' day'+(days!==1?'s':'')+' overdue</span><button class="btn btn-xs btn-g" onclick="openAssignModal('+c[6]+')">Assign</button></div></div>';});oh+='</div>';document.getElementById('os-overdue-list').innerHTML=oh;}}
+
+function renderTimerFlags(rows){var wrap=document.getElementById('os-timer-wrap');var count=document.getElementById('os-timer-count');if(!rows||!rows.length){count.textContent='All clear';wrap.innerHTML='<div class="empty" style="padding:20px;"><div class="et">No active searches</div><div class="es">Timer starts when you click Assign</div></div>';return;}var flagged=rows.filter(function(r){return r.flagged;}),active=rows.filter(function(r){return!r.flagged;});count.textContent=flagged.length+' flagged · '+active.length+' on track';var h='<div>';if(flagged.length){h+='<div style="padding:10px 20px;background:var(--red-bg);border-bottom:1px solid var(--red-border);"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--red);margin-bottom:8px;">Beyond 2 days — check in now</div>';flagged.forEach(function(r){var d=Math.floor(r.elapsedHours/24),hrs=r.elapsedHours%24;h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid rgba(0,0,0,.06);"><div><div style="font-size:13px;font-weight:500;color:var(--text-1);">'+esc(r.client)+'</div><div style="font-size:11px;color:var(--text-3);">VA: '+esc(r.primaryVA||'—')+' · started '+esc(r.startedDate)+'</div></div><span style="font-size:11px;font-weight:600;background:var(--red-bg);color:var(--red);padding:3px 10px;border-radius:99px;border:1px solid var(--red-border);">'+d+'d '+hrs+'h elapsed</span></div>';});h+='</div>';}if(active.length){h+='<div style="padding:10px 20px;"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--green);margin-bottom:8px;">On track (under 2 days)</div>';active.forEach(function(r){var d=Math.floor(r.elapsedHours/24),hrs=r.elapsedHours%24;h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border-soft);"><div><div style="font-size:12.5px;font-weight:500;color:var(--text-1);">'+esc(r.client)+'</div><div style="font-size:11px;color:var(--text-3);">VA: '+esc(r.primaryVA||'—')+' · started '+esc(r.startedDate)+'</div></div><span style="font-size:11px;font-weight:500;color:var(--green);">'+d+'d '+hrs+'h</span></div>';});h+='</div>';}h+='</div>';wrap.innerHTML=h;}
+
+function parseDue(val){if(!val)return null;var d=new Date(val);return isNaN(d.getTime())?null:(function(){d.setHours(0,0,0,0);return d;})();}
+function setOSFilter(st){osActiveFilter=st;osEditRow=null;renderOutsideSearch();}
+function setOSSearch(val){osSearchQuery=val;osEditRow=null;renderOutsideSearch();}
+function toggleOSEdit(ri){osEditRow=(osEditRow===ri?null:ri);renderOutsideSearch();}
+
+function onEditStatusChange(ri){var sv=document.getElementById('edit-status-'+ri),mf=document.getElementById('maxed-field-'+ri),af=document.getElementById('maxed-app-field-'+ri),nf=document.getElementById('maxed-notes-field-'+ri);if(!sv)return;var st=sv.value.toLowerCase(),isMaxed=st.includes('maxed out');if(mf)isMaxed?mf.classList.remove('hidden'):mf.classList.add('hidden');if(af)isMaxed?af.classList.remove('hidden'):af.classList.add('hidden');if(nf)isMaxed?nf.classList.remove('hidden'):nf.classList.add('hidden');}
+
+function saveInlineEdit(ri){var dv=document.getElementById('edit-date-'+ri),sv=document.getElementById('edit-status-'+ri);var dateVal=dv?dv.value.trim():'',statusVal=sv?sv.value:'';if(!dateVal&&!statusVal){toast('Nothing to save','warn');return;}var maxedAccount='',maxedApp='',maxedNotes='';if(statusVal.toLowerCase().includes('maxed out')){var mf=document.getElementById('edit-maxed-'+ri),af=document.getElementById('edit-maxed-app-'+ri),nf=document.getElementById('edit-maxed-notes-'+ri);maxedAccount=mf?mf.value.trim():'';maxedApp=af?af.value:'';maxedNotes=nf?nf.value.trim():'';}var clientName='';for(var i=0;i<osRawRows.length;i++){if(osRawRows[i][6]===ri){clientName=String(osRawRows[i][0]||'');break;}}toast('Saving...','info');gsr('updateClientDateStatus',{rowIndex:ri,dueDate:dateVal,status:statusVal,maxedAccount:maxedAccount,maxedApp:maxedApp,maxedNotes:maxedNotes,clientName:clientName},function(res){if(res&&res.success===false){toast(res.message,'err');return;}toast('Saved','ok');osEditRow=null;for(var i=0;i<osRawRows.length;i++){if(osRawRows[i][6]===ri){if(dateVal)osRawRows[i][1]=dateVal;if(statusVal)osRawRows[i][4]=statusVal;break;}}renderOutsideSearch();},function(e){toast(e.message,'err');});}
+
+function toggleOverdue(){osOverdueOpen=!osOverdueOpen;document.getElementById('os-overdue-body').style.display=osOverdueOpen?'block':'none';document.getElementById('os-overdue-toggle-lbl').textContent=osOverdueOpen?'Collapse':'Expand';}
+
+function openAssignModal(ri){var row=null;for(var i=0;i<osRawRows.length;i++){if(osRawRows[i][6]===ri){row=osRawRows[i];break;}}if(!row){toast('Row not found','err');return;}osAssignRow=row;var html='<div class="modal-bg open" id="os-assign-modal" style="z-index:1001;"><div class="modal"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;"><div><div class="modal-title">Assign - '+esc(String(row[0]||''))+'</div><div style="font-size:12px;color:var(--text-2);">'+esc(String(row[3]||''))+(row[2]?' - '+esc(row[2]):'')+(row[1]?' - '+esc(row[1]):'')+'</div></div><button class="btn btn-g btn-sm" onclick="closeAssignModal()">✕</button></div><div class="g2" style="margin-bottom:12px;"><div class="fg"><label>Primary Searcher (col E)</label><input type="text" id="am-primary" value="'+esc(String(row[7]||''))+'" placeholder="VA name"></div><div class="fg"><label>Secondary Searcher (col K)</label><input type="text" id="am-secondary" value="'+esc(String(row[8]||''))+'" placeholder="VA name (optional)"></div></div><div class="g2" style="margin-bottom:16px;"><div class="fg"><label>Profiles needed <span class="lnote">enter number, saves x3</span></label><div style="display:flex;gap:8px;align-items:center;"><input type="text" id="am-profiles" placeholder="e.g. 25" style="width:80px;" oninput="updateProfilesPreview()"><span style="font-size:12px;color:var(--text-3);">saves <strong id="am-profiles-preview" style="color:var(--text-1);">--</strong> to col C</span></div></div><div class="fg"><label>Due Date (col B)</label><input type="text" id="am-date" value="'+esc(row[1]||'')+'"></div></div><div style="background:var(--surface);border:1px solid var(--border-soft);border-radius:var(--r-sm);padding:10px 13px;margin-bottom:16px;font-size:11.5px;color:var(--text-3);">After saving: status auto-sets to Search In Progress</div><div class="brow"><button class="btn btn-ok" id="btn-am-save" onclick="saveAssign()">Save to Sheet</button><button class="btn btn-g" onclick="closeAssignModal()">Cancel</button></div></div></div>';var el=document.createElement('div');el.id='os-assign-wrap';el.innerHTML=html;document.body.appendChild(el);}
+function updateProfilesPreview(){var v=document.getElementById('am-profiles').value.trim();var n=Number(v);document.getElementById('am-profiles-preview').textContent=(!isNaN(n)&&n)?String(n*3):'--';}
+function closeAssignModal(){var el=document.getElementById('os-assign-wrap');if(el)el.parentNode.removeChild(el);osAssignRow=null;}
+function saveAssign(){if(!osAssignRow){toast('No row selected','err');return;}var ri=osAssignRow[6];var primary=document.getElementById('am-primary').value.trim();var secondary=document.getElementById('am-secondary').value.trim();var profilesRaw=document.getElementById('am-profiles').value.trim();var dueDate=document.getElementById('am-date').value.trim();if(!primary){toast('Enter Primary Searcher','warn');return;}setBtn('btn-am-save',true,'Saving...');var params={rowIndex:ri,primaryVA:primary,secondaryVA:secondary,dueDate:dueDate};if(profilesRaw)params.profiles=Number(profilesRaw);gsr('assignClient',params,function(res){setBtn('btn-am-save',false,'Save to Sheet');if(res&&res.success===false){toast(res.message,'err');return;}toast('Assigned! Status is now Search In Progress','ok');storeOSPrefill(osAssignRow);closeAssignModal();for(var i=0;i<osRawRows.length;i++){if(osRawRows[i][6]===ri){osRawRows[i][7]=primary;osRawRows[i][8]=secondary;if(dueDate)osRawRows[i][1]=dueDate;if(profilesRaw)osRawRows[i][5]=Number(profilesRaw)*3;osRawRows[i][4]='Search In Progress';break;}}renderOutsideSearch();},function(e){setBtn('btn-am-save',false,'Save to Sheet');toast(e.message,'err');});}
+
+function assignNow(clientName,city,age){switchTab('assign');if(clientName)s('inp-cn',clientName);if(city){s('inp-cy',city);document.getElementById('cy-hint').style.display='';}if(age){s('inp-ag',age);document.getElementById('ag-hint').style.display='';}toast('Pre-filled from Outside Search queue','ok');}
+function osStatusBadge(st){var l=st.toLowerCase();var bg='var(--bg)',tc='var(--text-3)',bc='var(--border)';if(l==='search in progress'){bg='var(--amber-bg)';tc='var(--amber)';bc='var(--amber-border)';}else if(l.includes('rework')){bg='var(--red-bg)';tc='var(--red)';bc='var(--red-border)';}else if(l==='done'||l.includes('completed')){bg='var(--green-bg)';tc='var(--green)';bc='var(--green-border)';}else if(l.includes('pending')){bg='var(--accent-light)';tc='var(--accent-dark)';bc='var(--border-focus)';}else if(l==='not started'){bg='var(--surface)';tc='var(--text-2)';bc='var(--border)';}return'<span style="font-size:10.5px;font-weight:600;background:'+bg+';color:'+tc+';border:1px solid '+bc+';padding:2px 8px;border-radius:99px;white-space:nowrap;">'+esc(st)+'</span>';}
+
+/* MAXED OUT HISTORY */
+function checkMaxedOutHistory(clientName){hide('maxed-warning');document.getElementById('maxed-warning-list').innerHTML='';if(!clientName)return;gsr('getMaxedOutHistory',{clientName:clientName},function(rows){if(!rows||!rows.length){hide('maxed-warning');return;}var items=rows.map(function(r){var app=String(r[5]||'').trim();var notes=String(r[6]||'').trim();var appBadgeHtml='';if(app==='HNG')appBadgeHtml=' <span style="font-size:10px;font-weight:700;background:var(--hinge-bg);color:var(--hinge);padding:1px 6px;border-radius:4px;border:1px solid #d4a0a0;">HNG</span>';else if(app==='BMB')appBadgeHtml=' <span style="font-size:10px;font-weight:700;background:var(--bumble-bg);color:var(--bumble);padding:1px 6px;border-radius:4px;border:1px solid #d4b888;">BMB</span>';else if(app==='Both')appBadgeHtml=' <span style="font-size:10px;font-weight:700;background:var(--red-bg);color:var(--red);padding:1px 6px;border-radius:4px;border:1px solid var(--red-border);">HNG+BMB</span>';var line='• '+esc(String(r[2]||'—'))+appBadgeHtml+' · maxed '+esc(String(r[0]||''));if(notes)line+=' <span style="color:var(--text-3);font-size:11px;">— '+esc(notes)+'</span>';return line;}).join('<br>');document.getElementById('maxed-warning-list').innerHTML=items;show('maxed-warning');},function(){hide('maxed-warning');});}
+
+/* LIVE ACCOUNT STATUS */
+function loadAccountStatus(rec){var panel=document.getElementById('acct-status-panel'),list=document.getElementById('acct-status-list');if(!panel||!list)return;var accounts=[{label:'Primary',email:rec.bestLogin||'',acctId:rec.bestAccountId||''},{label:'Backup 1',email:rec.backup1Login||'',acctId:rec.backup1||''},{label:'Backup 2',email:rec.backup2Login||'',acctId:rec.backup2||''}].filter(function(a){return a.email;});if(!accounts.length){panel.classList.add('hidden');return;}panel.classList.remove('hidden');list.innerHTML='<div class="load" style="padding:12px 0;"><div class="spin"></div> Checking tracker…</div>';var results={};var pending=accounts.length;accounts.forEach(function(a){gsr('lookupAccount',{query:a.email,searchType:'email'},function(rows){results[a.email]=rows||[];pending--;if(pending===0)renderAccountStatus(accounts,results);},function(){results[a.email]=[];pending--;if(pending===0)renderAccountStatus(accounts,results);});});}
+function renderAccountStatus(accounts,results){var list=document.getElementById('acct-status-list');if(!list)return;var h='';accounts.forEach(function(a){var rows=results[a.email]||[];var match=rows.filter(function(r){return(r.email||'').toLowerCase()===a.email.toLowerCase();});h+='<div style="border:1px solid var(--border);border-radius:var(--r-md);overflow:hidden;">';h+='<div style="background:var(--surface);padding:7px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border-soft);">';h+='<div><span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--text-3);">'+esc(a.label)+'</span>';h+=' <span style="font-size:11.5px;color:var(--text-2);font-family:var(--mono);">'+esc(a.email)+'</span></div>';if(!match.length){h+='<span style="font-size:11px;color:var(--text-3);">Not found in tracker</span>';}h+='</div>';if(match.length){match.forEach(function(r){var avail=(r.status||'').toLowerCase().includes('available');var bg=avail?'var(--green-bg)':'var(--amber-bg)';var tc=avail?'var(--green)':'var(--amber)';var bc=avail?'var(--green-border)':'var(--amber-border)';h+='<div style="padding:8px 12px;background:'+bg+';display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">';h+='<div><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px;border:1px solid '+bc+';color:'+tc+';background:'+bg+';">'+(avail?'✓ Available':'● In Use')+'</span>';h+=' <span style="font-size:11px;color:'+tc+';">'+abadge(r.app||'')+'</span>';if(r.ownerVA)h+=' <span style="font-size:11px;color:var(--text-2);">Owner: '+esc(r.ownerVA)+'</span>';if(!avail&&r.currentUser)h+=' <span style="font-size:11px;color:var(--text-2);">→ '+esc(r.currentUser)+(r.clientAssigned?' ('+esc(r.clientAssigned)+')':'')+'</span>';h+='</div><div style="display:flex;gap:5px;">';if(avail){var safeEmail=a.email.replace(/'/g,"\\'"),safeApp=(r.app||'').replace(/'/g,"\\'");h+='<button class="btn btn-xs btn-ok" onclick="quickSetInUse(\''+safeEmail+'\',\''+safeApp+'\')">Set In Use</button>';}else{var safeEmail2=a.email.replace(/'/g,"\\'"),safeApp2=(r.app||'').replace(/'/g,"\\'");h+='<button class="btn btn-xs btn-del" onclick="quickSetAvailable(\''+safeEmail2+'\',\''+safeApp2+'\')">Set Available</button>';}h+='</div></div>';});} h+='</div>';});list.innerHTML=h;}
+function quickSetInUse(email,app){var hld=g('inp-hld'),cn=g('inp-cn');if(!hld){toast('Enter Assign to VA first','warn');return;}gsr('setAccountStatus',{email:email,app:app,status:'In Use',vaName:hld,clientName:cn||''},function(res){if(res&&res.success===false){toast(res.message,'err');return;}toast('Set In Use ✓','ok');if(S.rec)loadAccountStatus(S.rec);},function(e){toast(e.message,'err');});}
+function quickSetAvailable(email,app){gsr('setAccountStatus',{email:email,app:app,status:'Available',vaName:'',clientName:''},function(res){if(res&&res.success===false){toast(res.message,'err');return;}toast('Set Available ✓','ok');if(S.rec)loadAccountStatus(S.rec);},function(e){toast(e.message,'err');});}
+
+/* OS PRE-FILL */
+var osAssignPrefill=null;
+function storeOSPrefill(row){osAssignPrefill={clientName:String(row[0]||'').trim(),city:String(row[3]||'').trim(),agePref:String(row[2]||'').trim()};}
+function applyOSPrefill(){if(!osAssignPrefill)return;var p=osAssignPrefill;if(p.clientName){s('inp-cn',p.clientName);document.getElementById('cy-hint').style.display='none';document.getElementById('ag-hint').style.display='none';}if(p.city){s('inp-cy',p.city);document.getElementById('cy-hint').style.display='';}if(p.agePref){s('inp-ag',p.agePref);document.getElementById('ag-hint').style.display='';}var banner=document.getElementById('assign-prefill-banner'),desc=document.getElementById('assign-prefill-desc');if(banner&&desc){desc.textContent=p.clientName+(p.city?' · '+p.city:'')+(p.agePref?' · '+p.agePref:'');banner.classList.remove('hidden');}}
+function clearPrefillBanner(){osAssignPrefill=null;var b=document.getElementById('assign-prefill-banner');if(b)b.classList.add('hidden');}
+
+/* BADGE HELPERS */
+function sbadge(s){s=String(s||'').trim();if(!s)return'<span class="badge bx">—</span>';var l=s.toLowerCase();if(l.includes('available'))return'<span class="badge bg">✓ Available</span>';if(l.includes('in use'))return'<span class="badge ba">● In Use</span>';if(l.includes('active'))return'<span class="badge bg">✓ Active</span>';return'<span class="badge bx">'+esc(s)+'</span>';}
+function abadge(a){var l=String(a||'').toLowerCase();if(l.includes('hinge'))return'<span class="badge bh">Hinge</span>';if(l.includes('bumble'))return'<span class="badge bb">Bumble</span>';return a?'<span class="badge bx">'+esc(a)+'</span>':'<span class="badge bx">—</span>';}
+
+/* UTILS */
+function toggleTheme(){var html=document.documentElement,btn=document.getElementById('theme-btn');var dark=html.getAttribute('data-theme')==='dark';html.setAttribute('data-theme',dark?'light':'dark');btn.textContent=dark?'🌙 Dark':'☀️ Light';}
+function g(id){var e=document.getElementById(id);return e?e.value.trim():'';}
+function s(id,val){var e=document.getElementById(id);if(e)e.value=val;}
+function esc(x){return String(x||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function show(id){var e=document.getElementById(id);if(e)e.classList.remove('hidden');}
+function hide(id){var e=document.getElementById(id);if(e)e.classList.add('hidden');}
+function setBtn(id,dis,lbl){var b=document.getElementById(id);if(!b)return;b.disabled=dis;if(lbl)b.innerHTML=dis?'<span class="spin"></span> '+lbl:lbl;}
+function gsr(action,params,onOk,onErr){google.script.run.withSuccessHandler(onOk).withFailureHandler(onErr||function(e){toast(e.message,'err');}).serverCall(action,params);}
+</script>
+</body>
+</html>
